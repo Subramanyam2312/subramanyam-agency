@@ -1,0 +1,26 @@
+# Secrets
+.env
+
+# Runtime state
+storage/logs/*
+storage/cache/*
+storage/sessions/*
+storage/purifier/*
+!storage/**/.gitkeep
+
+# Uploaded media — user content, not source
+public/uploads/*
+!public/uploads/.htaccess
+!public/uploads/.gitkeep
+
+# Generated
+public/sitemap.xml
+
+# Tooling
+.DS_Store
+resources/bin/tailwindcss
+node_modules/
+
+# vendor/ is deliberately NOT ignored.
+# Composer is not guaranteed to exist on Hostinger shared hosting, so the
+# dependencies ship with the repo and deploy by file copy.
