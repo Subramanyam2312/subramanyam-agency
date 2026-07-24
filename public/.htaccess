@@ -1,0 +1,76 @@
+# Apache configuration for the web root.
+#
+# On Hostinger shared hosting the contents of this directory are what lives in
+# public_html; app/, storage/ and vendor/ sit one level above it and are therefore
+# unreachable over HTTP by construction, not just by rule.
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # --- HTTPS -------------------------------------------------------------
+    # Hostinger terminates TLS at the proxy, so the request arrives on :80 with
+    # X-Forwarded-Proto set. Checking %{HTTPS} alone causes a redirect loop there.
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP_HOST} !^localhost [NC]
+    RewriteCond %{HTTP_HOST} !^127\.0\.0\.1 [NC]
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # --- Canonical host ----------------------------------------------------
+    # Non-www is canonical. Change both lines together if that ever flips.
+    RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+    RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
+
+    # --- Trailing slash ----------------------------------------------------
+    # /blog/ and /blog must not both resolve, or every page has a duplicate.
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.+)/$ /$1 [L,R=301]
+
+    # --- Front controller --------------------------------------------------
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Directory listings off — without this, /assets/ enumerates the whole tree.
+Options -Indexes
+
+# Block dotfiles (.env, .git, editor backups) even if one is ever misplaced here.
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+<FilesMatch "\.(env|md|json|lock|sql|log|ini|yml|yaml|dist|bak|swp)$">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_headers.c>
+    # Backstop only. The application sets the full header set per response, including
+    # the per-request CSP nonce, which cannot be expressed in static config.
+    Header always set X-Content-Type-Options "nosniff"
+    Header always unset X-Powered-By
+    Header always unset Server
+</IfModule>
+
+# Long cache for fingerprinted assets. asset() appends ?v=<mtime>, so a changed
+# file gets a new URL and this never serves a stale build.
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css                "access plus 1 year"
+    ExpiresByType application/javascript  "access plus 1 year"
+    ExpiresByType image/webp              "access plus 1 year"
+    ExpiresByType image/jpeg              "access plus 1 year"
+    ExpiresByType image/png               "access plus 1 year"
+    ExpiresByType image/svg+xml           "access plus 1 year"
+    ExpiresByType font/woff2              "access plus 1 year"
+    ExpiresByType video/mp4               "access plus 1 month"
+    ExpiresDefault                        "access plus 1 hour"
+</IfModule>
+
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml
+    AddOutputFilterByType DEFLATE application/javascript application/json
+    AddOutputFilterByType DEFLATE image/svg+xml application/xml
+</IfModule>
+
+ErrorDocument 404 /index.php

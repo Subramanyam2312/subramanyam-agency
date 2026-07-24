@@ -1,0 +1,143 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Design tokens.
+ *
+ * Every colour in the build resolves through these. The brand direction picked in
+ * Phase 5 changes this block and nothing else.
+ */
+@layer base {
+  :root {
+    --c-ink:      12 14 18;
+    --c-surface:  18 21 26;
+    --c-raised:   25 29 36;
+    --c-line:     42 48 58;
+    --c-body:     226 232 240;
+    --c-muted:    140 152 170;
+    --c-accent:   122 162 255;
+    --c-positive: 74 194 137;
+    --c-warning:  226 176 84;
+    --c-danger:   238 111 111;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-ink text-body font-sans antialiased;
+  }
+
+  /*
+   * A visible focus ring is a WCAG 2.1 AA requirement and the single most common
+   * thing lost to a CSS reset. :focus-visible keeps it off mouse clicks.
+   */
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-ink;
+  }
+
+  ::selection {
+    @apply bg-accent/30;
+  }
+}
+
+@layer components {
+  /* Frosted panel — the recurring surface treatment across admin and site. */
+  .glass {
+    @apply bg-surface/70 border border-line/70 backdrop-blur-xl;
+  }
+
+  .card {
+    @apply glass rounded-card shadow-card;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5
+           text-sm font-medium transition-colors duration-150
+           disabled:opacity-50 disabled:pointer-events-none;
+  }
+
+  .btn-primary {
+    @apply btn bg-accent text-ink hover:bg-accent/90;
+  }
+
+  .btn-ghost {
+    @apply btn border border-line text-body hover:bg-raised;
+  }
+
+  .btn-danger {
+    @apply btn bg-danger/15 text-danger border border-danger/40 hover:bg-danger/25;
+  }
+
+  .field-label {
+    @apply block text-sm font-medium text-body mb-1.5;
+  }
+
+  .field-input {
+    @apply w-full rounded-lg bg-raised border border-line px-3.5 py-2.5 text-body
+           placeholder:text-muted/70 transition-colors
+           focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent;
+  }
+
+  .field-input[aria-invalid='true'] {
+    @apply border-danger focus:border-danger focus:ring-danger;
+  }
+
+  .field-error {
+    @apply mt-1.5 text-sm text-danger;
+  }
+
+  .field-hint {
+    @apply mt-1.5 text-sm text-muted;
+  }
+
+  .alert {
+    @apply flex items-start gap-3 rounded-lg border px-4 py-3 text-sm;
+  }
+
+  .alert-success {
+    @apply alert border-positive/40 bg-positive/10 text-positive;
+  }
+
+  .alert-error {
+    @apply alert border-danger/40 bg-danger/10 text-danger;
+  }
+
+  .alert-warning {
+    @apply alert border-warning/40 bg-warning/10 text-warning;
+  }
+
+  .nav-link {
+    @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-muted
+           transition-colors hover:bg-raised hover:text-body;
+  }
+
+  .nav-link-active {
+    @apply bg-raised text-body;
+  }
+
+  .stat-value {
+    @apply text-3xl font-semibold tracking-tight text-body tabular-nums;
+  }
+
+  .stat-label {
+    @apply text-sm text-muted;
+  }
+}
+
+/*
+ * Honour the OS "reduce motion" setting globally. Any animation added later is
+ * covered by this without remembering to opt in.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
