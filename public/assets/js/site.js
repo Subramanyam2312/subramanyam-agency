@@ -93,6 +93,107 @@
     });
   }
 
+  /* --------------------------------------------------- back to top button */
+
+  const backToTop = document.getElementById('back-to-top');
+
+  if (backToTop) {
+    const toggleBackToTop = function () {
+      const show = window.scrollY > window.innerHeight * 0.6;
+      backToTop.classList.toggle('hidden', !show);
+      backToTop.classList.toggle('flex', show);
+    };
+
+    toggleBackToTop();
+    window.addEventListener('scroll', toggleBackToTop, { passive: true });
+
+    backToTop.addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+    });
+  }
+
+  /* ------------------------------------------------------ scroll progress */
+
+  const progress = document.getElementById('scroll-progress');
+
+  if (progress) {
+    let ticking = false;
+
+    const updateProgress = function () {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const ratio = max > 0 ? Math.min(1, window.scrollY / max) : 0;
+      progress.style.transform = 'scaleX(' + ratio + ')';
+      ticking = false;
+    };
+
+    // rAF-throttled: the scroll handler fires far more often than the screen
+    // repaints, and writing a transform on every event is wasted layout work.
+    window.addEventListener('scroll', function () {
+      if (!ticking) {
+        window.requestAnimationFrame(updateProgress);
+        ticking = true;
+      }
+    }, { passive: true });
+
+    updateProgress();
+  }
+
+  /* ------------------------------------------------------ hero parallax */
+
+  const heroMotion = document.querySelector('.hero-motion');
+
+  if (heroMotion && !reduceMotion) {
+    let parallaxTicking = false;
+
+    const updateParallax = function () {
+      const offset = Math.min(window.scrollY, window.innerHeight) * 0.18;
+      heroMotion.style.transform = 'translate3d(0,' + offset + 'px,0)';
+      parallaxTicking = false;
+    };
+
+    window.addEventListener('scroll', function () {
+      if (!parallaxTicking) {
+        window.requestAnimationFrame(updateParallax);
+        parallaxTicking = true;
+      }
+    }, { passive: true });
+  }
+
+  /* --------------------------------------------------- split-word headings */
+
+  /**
+   * Wraps each word of a heading so it can rise into place behind a clip.
+   *
+   * Done in JS rather than in the templates because the source text comes from
+   * the CMS: an editor should be able to type a headline without knowing it will
+   * be sliced into spans. The text content is preserved exactly, so screen
+   * readers and search engines still see one continuous string.
+   */
+  if (!reduceMotion) {
+    document.querySelectorAll('[data-split]').forEach(function (heading) {
+      const words = heading.textContent.trim().split(/\s+/);
+
+      heading.textContent = '';
+
+      words.forEach(function (word, index) {
+        const outer = document.createElement('span');
+        outer.className = 'word';
+
+        const inner = document.createElement('span');
+        inner.textContent = word;
+        // Stagger, capped so a long headline does not crawl in for two seconds.
+        inner.style.transitionDelay = Math.min(index * 45, 400) + 'ms';
+
+        outer.appendChild(inner);
+        heading.appendChild(outer);
+
+        if (index < words.length - 1) {
+          heading.appendChild(document.createTextNode(' '));
+        }
+      });
+    });
+  }
+
   /* -------------------------------------------------------- scroll reveal */
 
   const revealables = document.querySelectorAll('.reveal');
@@ -175,6 +276,102 @@
     track.addEventListener('scroll', updateArrows, { passive: true });
     window.addEventListener('resize', updateArrows);
   });
+
+  /* ------------------------------------------------------- async forms */
+
+  /**
+   * Progressive enhancement for the contact and newsletter forms: submit over
+   * fetch and swap in the result, so the thank-you state arrives without a full
+   * page reload. Without JS the same forms post normally and redirect back with
+   * a flash message — the outcome is identical, it just costs a page load.
+   */
+  document.querySelectorAll('form[data-async]').forEach(function (form) {
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      const button = form.querySelector('button[type="submit"]');
+      const original = button ? button.textContent : '';
+
+      if (button) {
+        button.disabled = true;
+        button.textContent = 'Sending…';
+      }
+
+      // Clear any errors left from a previous attempt.
+      form.querySelectorAll('[data-field-error]').forEach(function (el) { el.remove(); });
+      form.querySelectorAll('[aria-invalid]').forEach(function (el) { el.removeAttribute('aria-invalid'); });
+
+      fetch(form.action, {
+        method: 'POST',
+        body: new FormData(form),
+        headers: { Accept: 'application/json' },
+        credentials: 'same-origin',
+      })
+        .then(function (response) {
+          return response.json().then(function (data) {
+            return { ok: response.ok, data: data };
+          });
+        })
+        .then(function (result) {
+          if (result.data && result.data.ok) {
+            const done = document.createElement('div');
+            done.className = 'rounded-card border border-positive/40 bg-positive/10 px-6 py-8 text-center';
+            done.setAttribute('role', 'status');
+            done.innerHTML =
+              '<p class="display-md text-positive">Thank you</p>' +
+              '<p class="prose-body mx-auto mt-3 text-sm">' + escapeHtml(result.data.message) + '</p>';
+
+            form.replaceWith(done);
+            done.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'center' });
+
+            return;
+          }
+
+          // Field-level errors, rendered next to the input they belong to.
+          const errors = (result.data && result.data.errors) || {};
+          let firstField = null;
+
+          Object.keys(errors).forEach(function (name) {
+            const field = form.querySelector('[name="' + name + '"]');
+            if (!field) return;
+
+            field.setAttribute('aria-invalid', 'true');
+
+            const message = document.createElement('p');
+            message.className = 'field-error';
+            message.setAttribute('data-field-error', '');
+            message.textContent = errors[name];
+            field.insertAdjacentElement('afterend', message);
+
+            if (!firstField) firstField = field;
+          });
+
+          if (firstField) {
+            firstField.focus();
+          } else if (errors.message) {
+            window.alert(errors.message);
+          }
+        })
+        .catch(function () {
+          // Network failure: fall back to a real submit rather than losing what
+          // the visitor typed.
+          form.removeAttribute('data-async');
+          form.submit();
+        })
+        .finally(function () {
+          if (button) {
+            button.disabled = false;
+            button.textContent = original;
+          }
+        });
+    });
+  });
+
+  function escapeHtml(value) {
+    return String(value == null ? '' : value).replace(/[&<>"']/g, function (character) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[character];
+    });
+  }
 
   /* ----------------------------------------------------------- hero video */
 

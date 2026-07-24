@@ -5,6 +5,7 @@ use App\Models\Setting;
 $siteName = Setting::get('site_name', config('app.name'));
 
 $navigation = [
+    ['label' => 'Home',     'href' => '/', 'exact' => true],
     ['label' => 'Services', 'href' => '/services'],
     ['label' => 'Work',     'href' => '/work'],
     ['label' => 'About',    'href' => '/about'],
@@ -12,6 +13,16 @@ $navigation = [
 ];
 
 $currentPath = $currentPath ?? '/';
+
+/**
+ * '/' would prefix-match every path, so the Home link is compared exactly while
+ * the rest still highlight for their child pages (/blog/some-post lights Journal).
+ */
+$isActive = static function (array $item) use ($currentPath): bool {
+    return ($item['exact'] ?? false)
+        ? $currentPath === $item['href']
+        : str_starts_with($currentPath, $item['href']);
+};
 ?>
 <header id="site-header"
         class="fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,backdrop-filter] duration-300
@@ -24,8 +35,8 @@ $currentPath = $currentPath ?? '/';
         <nav class="hidden items-center gap-8 md:flex" aria-label="Main">
             <?php foreach ($navigation as $item): ?>
                 <a href="<?= e($item['href']) ?>"
-                   class="text-sm text-muted transition-colors hover:text-body <?= str_starts_with($currentPath, $item['href']) ? 'text-body' : '' ?>"
-                   <?= str_starts_with($currentPath, $item['href']) ? 'aria-current="page"' : '' ?>>
+                   class="nav-item text-sm <?= $isActive($item) ? 'text-body is-active' : 'text-muted' ?>"
+                   <?= $isActive($item) ? 'aria-current="page"' : '' ?>>
                     <?= e($item['label']) ?>
                 </a>
             <?php endforeach; ?>

@@ -242,26 +242,9 @@ $heroPoster = $block('hero_poster');
     </section>
 <?php endif; ?>
 
-<!-- ========================================================== STATS -->
-<section class="section rule" aria-label="By the numbers">
-    <div class="container-site">
-        <dl class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-            <?php foreach ([
-                ['stat_projects_value', 'stat_projects_label'],
-                ['stat_clients_value', 'stat_clients_label'],
-                ['stat_years_value', 'stat_years_label'],
-                ['stat_retention_value', 'stat_retention_label'],
-            ] as $index => [$valueKey, $labelKey]): ?>
-                <?php $value = $block($valueKey); ?>
-                <?php if ($value === '') { continue; } ?>
-                <div class="reveal">
-                    <dd class="display-lg tabular-nums"><?= e($value) ?></dd>
-                    <dt class="rule mt-4 pt-4 text-sm text-muted"><?= e($block($labelKey)) ?></dt>
-                </div>
-            <?php endforeach; ?>
-        </dl>
-    </div>
-</section>
+<!-- Stats band removed at the client's request. The stat_* page_blocks rows are
+     left in place rather than deleted, so the section can be restored later
+     without a migration or any data re-entry. -->
 
 <!-- ======================================================== JOURNAL -->
 <?php if ($posts !== []): ?>

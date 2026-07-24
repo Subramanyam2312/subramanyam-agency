@@ -23,7 +23,7 @@ $socials = array_filter([
                     <?= e(Setting::get('footer_copy', '')) ?>
                 </p>
 
-                <form method="post" action="/newsletter" class="mt-8 max-w-sm">
+                <form method="post" action="/newsletter" class="mt-8 max-w-sm" data-async>
                     <?= csrf_field() ?>
                     <label for="newsletter-email" class="eyebrow">Occasional notes, no spam</label>
                     <div class="mt-3 flex gap-2">

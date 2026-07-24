@@ -20,7 +20,11 @@ use App\Controllers\Admin\TestimonialController;
 use App\Controllers\Admin\TimelineController;
 use App\Controllers\Admin\UserController;
 use App\Controllers\Api\V1\MediaController as ApiMediaController;
+use App\Controllers\Site\BlogController;
+use App\Controllers\Site\ContactController;
 use App\Controllers\Site\HomeController;
+use App\Controllers\Site\NewsletterController;
+use App\Controllers\Site\PageController;
 use App\Controllers\Api\V1\PostController as ApiPostController;
 use App\Controllers\Api\V1\TaxonomyController as ApiTaxonomyController;
 use App\Core\Router;
@@ -37,10 +41,34 @@ use App\Middleware\RequireAuth;
 return function (Router $router): void {
 
     // ---- Public site --------------------------------------------------------
-    // Phase 5 in progress: Home is built and awaiting design approval. The
-    // remaining pages (services, work, about, blog, FAQ, contact, legal) follow
-    // once the design language is signed off, and until then correctly 404.
     $router->get('/', [HomeController::class, 'index']);
+
+    $router->get('/services', [PageController::class, 'services']);
+    $router->get('/services/{slug:[a-z0-9-]+}', [PageController::class, 'service']);
+
+    $router->get('/work', [PageController::class, 'work']);
+    $router->get('/work/{slug:[a-z0-9-]+}', [PageController::class, 'caseStudy']);
+
+    $router->get('/about', [PageController::class, 'about']);
+    $router->get('/faq', [PageController::class, 'faq']);
+
+    /*
+     * Blog. The category route is declared BEFORE the post route: '/blog/category'
+     * would otherwise be swallowed by '/blog/{slug}' and 404 as a missing post,
+     * since the router takes the first pattern that matches.
+     */
+    $router->get('/blog', [BlogController::class, 'index']);
+    $router->get('/blog/category/{slug:[a-z0-9-]+}', [BlogController::class, 'index']);
+    $router->get('/blog/{slug:[a-z0-9-]+}', [BlogController::class, 'show']);
+    $router->get('/feed.xml', [BlogController::class, 'feed']);
+
+    $router->get('/contact', [ContactController::class, 'show']);
+    $router->post('/contact', [ContactController::class, 'submit']);
+
+    $router->post('/newsletter', [NewsletterController::class, 'subscribe']);
+
+    // Privacy and terms, both stored as editable page copy.
+    $router->get('/{page:privacy|terms}', [PageController::class, 'legal']);
 
 
     /**
