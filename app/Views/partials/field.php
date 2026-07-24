@@ -18,6 +18,12 @@
  *   fields    array    for repeater: [key => label]
  *   media     array    for media: the currently attached media row
  *   attrs     string   extra raw attributes
+ *
+ * SECURITY: `attrs` is printed into the tag WITHOUT escaping, because its whole
+ * purpose is to inject attributes (' min="1" max="5"'). It is therefore a
+ * developer-only channel — every current caller passes a literal. Never pass
+ * request data, a database value, or anything an editor typed through it; that
+ * would be an HTML injection point. Escape and use a dedicated key instead.
  */
 
 $name     = $name     ?? '';

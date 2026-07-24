@@ -45,13 +45,15 @@ $block = static fn (string $key, string $default = ''): string => PageBlock::val
         </h2>
 
         <ul class="mt-14 grid gap-px overflow-hidden rounded-card border border-line/70 bg-line/70 sm:grid-cols-2">
-            <?php for ($value = 1; $value <= 4; $value++): ?>
-                <?php $title = $block("value_{$value}_title"); ?>
+            <?php /* $slot, not $value: a loop counter printed unescaped should not
+                     carry a name that invites someone to assign content to it. */ ?>
+            <?php for ($slot = 1; $slot <= 4; $slot++): ?>
+                <?php $title = $block("value_{$slot}_title"); ?>
                 <?php if ($title === '') { continue; } ?>
                 <li class="reveal lift bg-ink p-8">
-                    <p class="font-mono text-xs text-muted/70">0<?= $value ?></p>
+                    <p class="font-mono text-xs text-muted/70">0<?= (int) $slot ?></p>
                     <h3 class="display-md mt-4"><?= e($title) ?></h3>
-                    <p class="prose-body mt-3 text-sm"><?= e($block("value_{$value}_body")) ?></p>
+                    <p class="prose-body mt-3 text-sm"><?= e($block("value_{$slot}_body")) ?></p>
                 </li>
             <?php endfor; ?>
         </ul>

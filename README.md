@@ -153,16 +153,63 @@ really exists, and seeding one would produce broken images.
 
 ---
 
+## What is here
+
+**Public site** — home, services index and detail, work index and case studies,
+about, FAQ, blog with category filtering and search, post pages, contact, privacy,
+terms, RSS. Every string on every page comes from the CMS.
+
+**Content portal** at `/admin` — posts (rich text, scheduling, tags, per-post SEO),
+categories, services with per-service FAQs, case studies, testimonials, FAQs,
+timeline, client logos, page copy, media library, enquiry inbox, newsletter
+subscribers, settings, users and API tokens.
+
+**REST API** at `/api/v1` — token-authenticated, so an external agent can publish
+here. See `API.md`.
+
+---
+
+## Commands
+
+```bash
+php database/migrate.php --seed     # schema + placeholder content
+php scripts/create-admin.php        # first account (no public sign-up exists)
+php scripts/security-audit.php      # 26 checks; exits non-zero on failure
+php scripts/publish-scheduled.php   # cron: publish due posts, sweep rate limits
+./resources/build-css.sh            # compile Tailwind
+```
+
+Run the security audit before every deploy. It boots the real router and asserts
+that no `/admin` route is reachable without a session, that settings and users
+additionally require the admin role, that every `/api` route needs a bearer token,
+and that every mutating non-API route verifies CSRF — checks that catch a route
+written into the wrong group, which is how admin pages leak.
+
+---
+
 ## Build status
 
 | Phase | Scope | State |
 |---|---|---|
 | 1 | Stack, structure, schema | Done — `PHASE-1-PLAN.md` |
 | 2 | Scaffold, migrations, seed, auth, admin shell | Done |
-| 3 | CMS content modules, media library, settings | Not started |
-| 4 | REST API + `API.md` | Not started |
-| 5 | Public site | Not started |
-| 6 | SEO, schema, performance, accessibility | Not started |
-| 7 | Security review, `DEPLOY.md` | Not started |
+| 3 | CMS content modules, media library, settings | Done |
+| 4 | REST API + `API.md` | Done |
+| 5 | Public site | Done |
+| 6 | SEO, schema, performance, accessibility | Done |
+| 7 | Security review, `DEPLOY.md` | Done |
 
-Until Phase 5 the site root correctly returns a 404 — there are no public routes yet.
+### Known gaps
+
+- **Lighthouse has not been run.** There was no Chrome binary in the build
+  environment. Page weight, contrast, heading order and blocking-resource counts
+  were measured directly instead. Run it against the live domain after deploy.
+- **No hero video file.** The mechanism is built and wired to a CMS field; set
+  Page copy → Hero → video URL and it attaches after load, desktop only, never
+  under reduced motion or on a metered connection. Until then the hero runs on a
+  CSS motion layer.
+- **Privacy and terms are a starting point, not legal advice.** They describe what
+  this application actually does. Have them reviewed.
+- **Critical CSS is not inlined.** Deliberate — the reasoning is in the layout head.
+- **Client logos and media are not seeded**, because a media row must point at a
+  file that exists. Upload real assets before the logo marquee appears.
