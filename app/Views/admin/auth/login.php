@@ -44,7 +44,7 @@
     <div class="mb-6 flex items-center justify-between">
         <label for="remember" class="flex items-center gap-2 text-sm text-muted">
             <input type="checkbox" id="remember" name="remember" value="1"
-                   class="rounded border-line bg-raised text-accent focus:ring-accent">
+                   class="rounded border-field bg-raised text-accent focus:ring-accent">
             Remember this device
         </label>
 

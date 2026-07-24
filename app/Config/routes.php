@@ -25,6 +25,7 @@ use App\Controllers\Site\ContactController;
 use App\Controllers\Site\HomeController;
 use App\Controllers\Site\NewsletterController;
 use App\Controllers\Site\PageController;
+use App\Controllers\Site\SeoController;
 use App\Controllers\Api\V1\PostController as ApiPostController;
 use App\Controllers\Api\V1\TaxonomyController as ApiTaxonomyController;
 use App\Core\Router;
@@ -69,6 +70,14 @@ return function (Router $router): void {
 
     // Privacy and terms, both stored as editable page copy.
     $router->get('/{page:privacy|terms}', [PageController::class, 'legal']);
+
+    /*
+     * Apache serves the generated sitemap.xml directly when the file exists, so
+     * this route only runs on a fresh deploy before the first publish. robots.txt
+     * is always dynamic because it depends on the maintenance-mode toggle.
+     */
+    $router->get('/sitemap.xml', [SeoController::class, 'sitemap']);
+    $router->get('/robots.txt', [SeoController::class, 'robots']);
 
 
     /**

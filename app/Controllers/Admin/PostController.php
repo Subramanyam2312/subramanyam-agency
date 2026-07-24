@@ -26,6 +26,8 @@ final class PostController extends ResourceController
     /** Bespoke two-column layout with a publishing sidebar. */
     protected ?string $formView = 'admin/posts/form';
 
+    protected bool $affectsSitemap = true;
+
     protected ?string $slugColumn = 'slug';
 
     protected array $searchable = ['title', 'slug', 'excerpt'];

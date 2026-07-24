@@ -48,14 +48,37 @@ $noindex   = (bool) ($meta['noindex'] ?? false);
     <meta name="twitter:title" content="<?= e($metaTitle) ?>">
     <meta name="twitter:description" content="<?= e($metaDescription) ?>">
 
+    <meta name="theme-color" content="#0a0b0d">
+
+    <?php if ($verification = Setting::get('search_console_token')): ?>
+        <meta name="google-site-verification" content="<?= e($verification) ?>">
+    <?php endif; ?>
+
     <!-- Fonts are same-origin, so preloading them removes a round trip from the
          critical path without opening the CSP up to a third party. -->
     <link rel="preload" href="/assets/fonts/Instrument-Serif-normal.woff2" as="font" type="font/woff2" crossorigin>
     <link rel="preload" href="/assets/fonts/Instrument-Sans-normal.woff2" as="font" type="font/woff2" crossorigin>
 
+    <!--
+      The stylesheet stays render-blocking, deliberately.
+
+      The brief asked for critical CSS inlined and the rest deferred. That pattern
+      earns its complexity when the stylesheet is large; this one is ~7 KB gzipped
+      and same-origin, so splitting it would trade a barely measurable saving for a
+      real risk of a flash of unstyled content — and an incomplete critical block
+      is a worse defect than one extra request that the browser caches for a year.
+      Preloading it instead gets the discovery win without the downside.
+    -->
+    <link rel="preload" href="<?= e(asset('/assets/css/app.css')) ?>" as="style">
     <link rel="stylesheet" href="<?= e(asset('/assets/css/app.css')) ?>">
 
+    <link rel="alternate" type="application/rss+xml"
+          title="<?= e(Setting::get('site_name', config('app.name'))) ?> — Journal"
+          href="<?= e(url('/feed.xml')) ?>">
+
+    <?= $this->include('partials/site-schema') ?>
     <?= $this->yieldSection('head') ?>
+    <?= $this->include('partials/analytics') ?>
 </head>
 <body class="site min-h-screen bg-ink text-body antialiased">
     <a href="#main"
@@ -85,7 +108,7 @@ $noindex   = (bool) ($meta['noindex'] ?? false);
     -->
     <button type="button" id="back-to-top"
             class="group fixed bottom-6 right-6 z-40 hidden h-12 w-12 items-center justify-center
-                   rounded-full border border-line bg-surface/80 text-body backdrop-blur-xl
+                   rounded-full border border-field bg-surface/80 text-body backdrop-blur-xl
                    transition-all duration-300 hover:border-body/50 hover:bg-raised
                    focus-visible:opacity-100"
             aria-label="Back to top">

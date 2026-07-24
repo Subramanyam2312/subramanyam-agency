@@ -22,6 +22,8 @@ final class CategoryController extends ResourceController
 
     protected string $order = 'sort_order ASC, name ASC';
 
+    protected bool $affectsSitemap = true;
+
     protected ?string $slugColumn = 'slug';
 
     protected string $slugSource = 'name';

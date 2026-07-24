@@ -10,6 +10,7 @@ use App\Core\Database;
 use App\Core\HttpException;
 use App\Core\Request;
 use App\Core\Response;
+use App\Core\Sitemap;
 use App\Core\Slugger;
 use App\Core\Validator;
 
@@ -55,6 +56,13 @@ abstract class ResourceController extends Controller
      * this because their forms need a bespoke two-column layout.
      */
     protected ?string $formView = null;
+
+    /**
+     * Set on modules whose records appear in sitemap.xml, so saving or deleting
+     * one regenerates it. Cheaper and more reliable than a nightly-only rebuild:
+     * a post published at 09:00 should be in the sitemap at 09:00.
+     */
+    protected bool $affectsSitemap = false;
 
     /** Column holding the slug, if this resource has one. */
     protected ?string $slugColumn = null;
@@ -214,6 +222,7 @@ abstract class ResourceController extends Controller
         $id = $model::create($data);
 
         $this->afterSave($id, $request, true);
+        $this->refreshSitemap();
 
         ActivityLogger::log(strtolower($this->views) . '.created', $model::table(), $id);
         $this->success($this->singular . ' created.');
@@ -249,6 +258,7 @@ abstract class ResourceController extends Controller
         $model::updateById($id, $data);
 
         $this->afterSave($id, $request, false);
+        $this->refreshSitemap();
 
         ActivityLogger::log(strtolower($this->views) . '.updated', $model::table(), $id);
         $this->success($this->singular . ' saved.');
@@ -271,6 +281,8 @@ abstract class ResourceController extends Controller
 
         $model = $this->model;
         $model::deleteById($id);
+
+        $this->refreshSitemap();
 
         ActivityLogger::log(strtolower($this->views) . '.deleted', $model::table(), $id);
         $this->success($this->singular . ' deleted.');
@@ -304,6 +316,19 @@ abstract class ResourceController extends Controller
     }
 
     // ---------------------------------------------------------------- internals
+
+    /**
+     * Rebuilds sitemap.xml for modules that appear in it.
+     *
+     * Sitemap::generate() swallows and logs its own failures, so a write problem
+     * can never turn a successful save into an error page for the editor.
+     */
+    private function refreshSitemap(): void
+    {
+        if ($this->affectsSitemap) {
+            Sitemap::generate();
+        }
+    }
 
     /**
      * @return array<string,mixed>

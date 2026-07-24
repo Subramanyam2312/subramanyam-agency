@@ -7,6 +7,8 @@ namespace App\Middleware;
 use App\Core\Nonce;
 use App\Core\Request;
 use App\Core\Response;
+use App\Models\Setting;
+use Throwable;
 
 /**
  * Applies the security header set to every response.
@@ -65,6 +67,21 @@ final class SecurityHeaders implements Middleware
             $directives['style-src'] = "'self' 'unsafe-inline'";
         }
 
+        /*
+         * Analytics widens the policy only when an ID is actually configured.
+         *
+         * A fresh install ships a strict policy and zero third-party requests;
+         * turning on GA is what opts you into Google's domains, and nothing else.
+         * Deliberately narrow: the tag script host and the collection endpoints,
+         * not a wildcard.
+         */
+        if (!str_starts_with($request->path(), '/admin') && $this->analyticsEnabled()) {
+            $directives['script-src'] .= ' https://www.googletagmanager.com';
+            $directives['img-src']    .= ' https://www.googletagmanager.com https://www.google-analytics.com';
+            $directives['connect-src'] .= ' https://www.google-analytics.com https://analytics.google.com'
+                . ' https://region1.google-analytics.com';
+        }
+
         $parts = [];
 
         foreach ($directives as $directive => $value) {
@@ -72,5 +89,24 @@ final class SecurityHeaders implements Middleware
         }
 
         return implode('; ', $parts);
+    }
+
+    /**
+     * Reads the same settings the analytics partial does, and applies the same
+     * format check — so a mistyped ID cannot widen the policy for a tag that will
+     * never load.
+     */
+    private function analyticsEnabled(): bool
+    {
+        try {
+            $ga4 = trim((string) Setting::get('ga_measurement_id', ''));
+            $gtm = trim((string) Setting::get('gtm_id', ''));
+        } catch (Throwable) {
+            // Headers must still be sent if the database is unreachable.
+            return false;
+        }
+
+        return preg_match('/^G-[A-Z0-9]{6,}$/i', $ga4) === 1
+            || preg_match('/^GTM-[A-Z0-9]{4,}$/i', $gtm) === 1;
     }
 }

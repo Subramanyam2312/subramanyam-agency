@@ -111,7 +111,7 @@
                 <?php foreach ($abilities as $key => $description): ?>
                     <label class="mb-2 flex items-start gap-3">
                         <input type="checkbox" name="abilities[]" value="<?= e($key) ?>"
-                               class="mt-0.5 rounded border-line bg-raised text-accent focus:ring-accent"
+                               class="mt-0.5 rounded border-field bg-raised text-accent focus:ring-accent"
                                <?= $key === 'read' ? 'checked' : '' ?>>
                         <span class="text-sm text-muted"><?= e($description) ?></span>
                     </label>

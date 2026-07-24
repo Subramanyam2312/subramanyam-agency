@@ -10,6 +10,7 @@ use App\Core\Database;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Sanitizer;
+use App\Core\Sitemap;
 use App\Core\Slugger;
 use App\Core\Validator;
 use App\Models\ApiToken;
@@ -138,6 +139,10 @@ final class PostController extends ApiController
 
         $this->syncTags($id, $request);
 
+        // An agent publishing a post should get it into the sitemap immediately,
+        // exactly as the CMS does.
+        Sitemap::generate();
+
         $this->log('api.post_created', 'posts', $id, ['title' => $request->input('title')]);
 
         $post = $this->findWithRelations($id);
@@ -240,6 +245,8 @@ final class PostController extends ApiController
         if ($request->has('tags')) {
             $this->syncTags($id, $request);
         }
+
+        Sitemap::generate();
 
         $this->log('api.post_updated', 'posts', $id, ['fields' => array_keys($data)]);
 

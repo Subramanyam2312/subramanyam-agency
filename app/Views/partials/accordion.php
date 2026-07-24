@@ -7,13 +7,21 @@
  * in-page find still reaches collapsed answers. The chevron rotation is the only
  * thing CSS has to add.
  *
- * Expects $items (rows with question/answer) and optionally $group.
+ * Expects $items (rows with question/answer), optionally $group, and $level —
+ * the heading level for the group label.
+ *
+ * $level is explicit rather than hardcoded because the correct level depends on
+ * where the accordion sits: on /faq each group is a top-level section (h2), but
+ * on a service page the accordion lives under a section heading, so its groups
+ * are h3. Hardcoding either one produces a heading-order violation on the other
+ * page — which is exactly what it did before this was a parameter.
  */
 $items = $items ?? [];
 $group = $group ?? '';
+$level = in_array($level ?? 2, [2, 3, 4], true) ? ($level ?? 2) : 2;
 ?>
 <?php if ($group !== ''): ?>
-    <h3 class="eyebrow mb-5"><?= e($group) ?></h3>
+    <h<?= $level ?> class="eyebrow mb-5"><?= e($group) ?></h<?= $level ?>>
 <?php endif; ?>
 
 <div class="divide-y divide-line/60 border-y border-line/60">

@@ -55,7 +55,12 @@
 
             <div class="mt-12 max-w-3xl">
                 <?php foreach (array_slice($faqs, 0, 1) as $group => $items): ?>
-                    <?= $this->include('partials/accordion', ['items' => $items, 'group' => $group]) ?>
+                    <!-- h3: this accordion sits beneath the section's own h2. -->
+                    <?= $this->include('partials/accordion', [
+                        'items' => $items,
+                        'group' => $group,
+                        'level' => 3,
+                    ]) ?>
                 <?php endforeach; ?>
             </div>
 

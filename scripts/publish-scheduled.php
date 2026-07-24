@@ -18,6 +18,7 @@ declare(strict_types=1);
 
 use App\Core\ActivityLogger;
 use App\Core\RateLimiter;
+use App\Core\Sitemap;
 use App\Models\Post;
 
 define('BASE_PATH', dirname(__DIR__));
@@ -38,10 +39,19 @@ if ($published > 0) {
 
 $swept = RateLimiter::sweep();
 
+/*
+ * Rebuild the sitemap whenever this run actually published something, and on the
+ * nightly run regardless — that second case is the safety net for a write that
+ * failed silently at publish time.
+ */
+$rebuild = $published > 0 || in_array('--sitemap', $argv, true);
+$sitemap = $rebuild ? Sitemap::generate() : ['ok' => true, 'count' => 0];
+
 printf(
-    "[%s] published %d scheduled post(s), swept %d expired rate-limit row(s)%s",
+    "[%s] published %d scheduled post(s), swept %d expired rate-limit row(s), sitemap: %s%s",
     date('Y-m-d H:i:s'),
     $published,
     $swept,
+    $rebuild ? ($sitemap['ok'] ? $sitemap['count'] . ' urls' : 'FAILED — ' . ($sitemap['message'] ?? '')) : 'skipped',
     PHP_EOL
 );

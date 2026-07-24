@@ -46,8 +46,7 @@ $isActive = static function (array $item) use ($currentPath): bool {
             <a href="/contact" class="btn-bone hidden h-10 px-5 text-sm md:inline-flex">Start a project</a>
 
             <button type="button" id="site-nav-toggle"
-                    class="relative z-10 -mr-2 inline-flex h-10 w-10 items-center justify-center rounded-full
-                           border border-line text-body md:hidden"
+                    class="relative z-10 -mr-2 inline-flex h-10 w-10 items-center justify-center rounded-full border border-field text-body md:hidden"
                     aria-controls="site-nav-drawer" aria-expanded="false" aria-label="Open menu">
                 <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                      stroke-width="1.5" stroke-linecap="round" aria-hidden="true">

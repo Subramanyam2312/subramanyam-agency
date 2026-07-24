@@ -130,28 +130,39 @@ final class View
     }
 
     /**
-     * @param array<string,mixed> $data
+     * @param array<string,mixed> $__data
+     *
+     * Every local in here is `__`-prefixed on purpose.
+     *
+     * extract() drops the caller's data into this method's own scope, so any
+     * local sharing a name with a view variable silently wins or loses depending
+     * on ordering. That is not theoretical: this method previously used $level
+     * for the output-buffer depth, which meant a template variable called $level
+     * was overwritten with the nesting depth — an accordion asked to render an
+     * <h2> emitted <h3> purely because it happened to be included one layer
+     * deeper. Prefixing makes a collision impossible rather than unlikely.
      */
-    private function renderFile(string $view, array $data): string
+    private function renderFile(string $__view, array $__data): string
     {
-        $file = VIEW_PATH . '/' . str_replace('..', '', $view) . '.php';
+        $__file = VIEW_PATH . '/' . str_replace('..', '', $__view) . '.php';
 
-        if (!is_file($file)) {
-            throw new RuntimeException("View not found: {$view}");
+        if (!is_file($__file)) {
+            throw new RuntimeException("View not found: {$__view}");
         }
 
-        extract($data, EXTR_SKIP);
+        $__bufferLevel = ob_get_level();
 
-        $level = ob_get_level();
+        // EXTR_SKIP so the guarded locals above can never be replaced either.
+        extract($__data, EXTR_SKIP);
 
         ob_start();
 
         try {
-            include $file;
+            include $__file;
         } catch (Throwable $e) {
             // Unwind any buffers the failed template opened, or the error page
             // gets rendered inside half a layout.
-            while (ob_get_level() > $level) {
+            while (ob_get_level() > $__bufferLevel) {
                 ob_end_clean();
             }
 

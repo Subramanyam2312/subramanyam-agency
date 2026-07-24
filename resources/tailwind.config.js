@@ -20,6 +20,10 @@ module.exports = {
         surface: 'rgb(var(--c-surface) / <alpha-value>)',
         raised:  'rgb(var(--c-raised) / <alpha-value>)',
         line:    'rgb(var(--c-line) / <alpha-value>)',
+        // Boundaries of interactive controls. Separate from --line because WCAG
+        // 1.4.11 requires 3:1 for those, while a decorative hairline is exempt —
+        // one token cannot satisfy both without making every divider shout.
+        field:   'rgb(var(--c-field) / <alpha-value>)',
         body:    'rgb(var(--c-body) / <alpha-value>)',
         muted:   'rgb(var(--c-muted) / <alpha-value>)',
         accent:  'rgb(var(--c-accent) / <alpha-value>)',

@@ -26,6 +26,8 @@ final class CaseStudyController extends ResourceController
 
     protected bool $sortable = true;
 
+    protected bool $affectsSitemap = true;
+
     protected ?string $slugColumn = 'slug';
 
     protected array $searchable = ['title', 'client_name', 'industry'];

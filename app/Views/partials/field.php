@@ -67,7 +67,7 @@ $aria        = ($error ? ' aria-invalid="true"' : '')
         <label for="<?= e($id) ?>" class="flex items-start gap-3 cursor-pointer">
             <input type="hidden" name="<?= e($name) ?>" value="0">
             <input type="checkbox" id="<?= e($id) ?>" name="<?= e($name) ?>" value="1"
-                   class="mt-0.5 rounded border-line bg-raised text-accent focus:ring-accent"
+                   class="mt-0.5 rounded border-field bg-raised text-accent focus:ring-accent"
                    <?= (string) $value === '1' ? 'checked' : '' ?><?= $attrs ?>>
             <span>
                 <span class="text-sm font-medium text-body"><?= e($label) ?></span>

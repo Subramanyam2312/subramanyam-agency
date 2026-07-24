@@ -45,6 +45,9 @@
     --c-surface:  18 21 26;
     --c-raised:   25 29 36;
     --c-line:     42 48 58;
+    /* Interactive control borders. Meets the 3:1 WCAG 1.4.11 minimum against the
+       page background, which --c-line deliberately does not. */
+    --c-field:    108 116 130;
     --c-body:     226 232 240;
     --c-muted:    140 152 170;
     --c-accent:   122 162 255;
@@ -95,7 +98,7 @@
   }
 
   .btn-ghost {
-    @apply btn border border-line text-body hover:bg-raised;
+    @apply btn border border-field text-body hover:bg-raised;
   }
 
   .btn-danger {
@@ -106,8 +109,10 @@
     @apply block text-sm font-medium text-body mb-1.5;
   }
 
+  /* border-field, not border-line: an input's boundary is what identifies it as
+     an input, so WCAG 1.4.11 applies. */
   .field-input {
-    @apply w-full rounded-lg bg-raised border border-line px-3.5 py-2.5 text-body
+    @apply w-full rounded-lg bg-raised border border-field px-3.5 py-2.5 text-body
            placeholder:text-muted/70 transition-colors
            focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent;
   }
@@ -172,6 +177,7 @@
     --c-surface: 17 18 21;
     --c-raised:  24 26 30;
     --c-line:    44 47 53;
+    --c-field:   112 118 130;
     --c-body:    236 231 225;
     --c-muted:   142 144 151;
     /* Bone rather than a chromatic accent: a light button on near-black is the
@@ -307,7 +313,7 @@
   }
 
   .btn-outline {
-    @apply btn rounded-full border border-line px-6 py-3 text-body hover:border-body/60;
+    @apply btn rounded-full border border-field px-6 py-3 text-body hover:border-body/60;
   }
 
   .link-underline {
