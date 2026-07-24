@@ -3,6 +3,37 @@
 @tailwind utilities;
 
 /*
+ * Self-hosted fonts. CSP is font-src 'self', so nothing loads from a CDN —
+ * which also means no third-party request on the critical path.
+ *
+ * Latin subsets only (~60 KB total). font-display: swap so text is readable
+ * immediately rather than invisible while the face downloads.
+ */
+@font-face {
+  font-family: 'Instrument Sans';
+  src: url('/assets/fonts/Instrument-Sans-normal.woff2') format('woff2-variations');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Instrument Serif';
+  src: url('/assets/fonts/Instrument-Serif-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Instrument Serif';
+  src: url('/assets/fonts/Instrument-Serif-italic.woff2') format('woff2');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/*
  * Design tokens.
  *
  * Every colour in the build resolves through these. The brand direction picked in
@@ -128,6 +159,171 @@
 }
 
 /*
+ * ---------------------------------------------------------------------------
+ * Public site — "Editorial Dark"
+ *
+ * Scoped to .site so the admin portal keeps its own neutral theme. Swapping the
+ * brand direction later means editing this token block, not the templates.
+ * ---------------------------------------------------------------------------
+ */
+@layer components {
+  .site {
+    --c-ink:     10 11 13;
+    --c-surface: 17 18 21;
+    --c-raised:  24 26 30;
+    --c-line:    44 47 53;
+    --c-body:    236 231 225;
+    --c-muted:   142 144 151;
+    /* Bone rather than a chromatic accent: a light button on near-black is the
+       single most "premium studio" move available, and it never dates. */
+    --c-accent:  230 223 212;
+
+    font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  }
+
+  /* Type ------------------------------------------------------------------ */
+
+  .display {
+    font-family: 'Instrument Serif', ui-serif, Georgia, serif;
+    font-weight: 400;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  .display-xl { @apply display; font-size: clamp(2.75rem, 7.5vw, 6.5rem); }
+  .display-lg { @apply display; font-size: clamp(2.25rem, 5vw, 4rem); }
+  .display-md { @apply display; font-size: clamp(1.75rem, 3.2vw, 2.75rem); }
+
+  .eyebrow {
+    @apply text-xs font-medium uppercase tracking-[0.22em] text-muted;
+  }
+
+  .lede {
+    @apply text-lg leading-relaxed text-muted sm:text-xl;
+    text-wrap: pretty;
+    max-width: 58ch;
+  }
+
+  .prose-body {
+    @apply leading-relaxed text-muted;
+    text-wrap: pretty;
+    max-width: 68ch;
+  }
+
+  /* Layout ---------------------------------------------------------------- */
+
+  .container-site {
+    @apply mx-auto w-full max-w-[78rem] px-5 sm:px-8;
+  }
+
+  .section {
+    @apply py-20 sm:py-28 lg:py-36;
+  }
+
+  .rule {
+    @apply border-t border-line/60;
+  }
+
+  /* A hairline label above each section, the way a print grid would number it. */
+  .section-index {
+    @apply font-mono text-xs text-muted/70;
+  }
+
+  /* Components ------------------------------------------------------------ */
+
+  .btn-bone {
+    @apply btn rounded-full bg-accent px-6 py-3 text-ink hover:bg-accent/90;
+  }
+
+  .btn-outline {
+    @apply btn rounded-full border border-line px-6 py-3 text-body hover:border-body/60;
+  }
+
+  .link-underline {
+    @apply underline decoration-line underline-offset-4 transition-colors hover:decoration-body;
+  }
+
+  .card-flat {
+    @apply rounded-card border border-line/70 bg-surface/60 p-6 transition-colors;
+  }
+
+  .card-flat:hover {
+    @apply border-line;
+  }
+
+  /* Scroll reveal. Elements start hidden ONLY when JS is present to reveal them —
+     .js is set on <html> by site.js, so with JS disabled everything stays visible. */
+  .js .reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .js .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Marquee --------------------------------------------------------------- */
+
+  .marquee {
+    @apply relative flex overflow-hidden;
+    /* Fade the ends so logos enter and leave rather than being clipped. */
+    mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  }
+
+  .marquee-track {
+    @apply flex shrink-0 items-center gap-14 pr-14;
+    animation: marquee-scroll var(--marquee-duration, 42s) linear infinite;
+  }
+
+  .marquee:hover .marquee-track {
+    animation-play-state: paused;
+  }
+
+  /* Hero ------------------------------------------------------------------ */
+
+  .hero-motion {
+    /* The always-on motion layer. Pure CSS, no bytes, no LCP cost — the optional
+       self-hosted video is layered on top of this only after the hero has painted. */
+    background:
+      radial-gradient(60% 50% at 20% 15%, rgb(var(--c-accent) / 0.09), transparent 70%),
+      radial-gradient(50% 40% at 85% 25%, rgb(140 170 255 / 0.08), transparent 70%),
+      radial-gradient(70% 60% at 50% 100%, rgb(var(--c-accent) / 0.05), transparent 70%);
+    animation: hero-drift 24s ease-in-out infinite alternate;
+  }
+
+  .hero-grain {
+    /* Inline SVG noise: no network request, and it stops the gradients banding
+       on cheap panels, which is what makes a dark hero look amateur. */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+    opacity: 0.035;
+  }
+
+  .hero-video {
+    @apply absolute inset-0 h-full w-full object-cover opacity-0;
+    transition: opacity 1.2s ease;
+  }
+
+  .hero-video.is-ready {
+    opacity: 0.34;
+  }
+}
+
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-100%); }
+}
+
+@keyframes hero-drift {
+  from { transform: scale(1) translate3d(0, 0, 0); }
+  to   { transform: scale(1.12) translate3d(0, -1.5%, 0); }
+}
+
+/*
  * Honour the OS "reduce motion" setting globally. Any animation added later is
  * covered by this without remembering to opt in.
  */
@@ -139,5 +335,20 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  /* Reveal animations must not leave content invisible when motion is off. */
+  .js .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* An infinite marquee is exactly what this setting exists to stop. */
+  .marquee-track {
+    animation: none !important;
+  }
+
+  .marquee {
+    overflow-x: auto;
   }
 }

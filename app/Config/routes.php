@@ -20,6 +20,7 @@ use App\Controllers\Admin\TestimonialController;
 use App\Controllers\Admin\TimelineController;
 use App\Controllers\Admin\UserController;
 use App\Controllers\Api\V1\MediaController as ApiMediaController;
+use App\Controllers\Site\HomeController;
 use App\Controllers\Api\V1\PostController as ApiPostController;
 use App\Controllers\Api\V1\TaxonomyController as ApiTaxonomyController;
 use App\Core\Router;
@@ -34,6 +35,13 @@ use App\Middleware\RequireAuth;
  * site root correctly returns a 404 rather than a placeholder page.
  */
 return function (Router $router): void {
+
+    // ---- Public site --------------------------------------------------------
+    // Phase 5 in progress: Home is built and awaiting design approval. The
+    // remaining pages (services, work, about, blog, FAQ, contact, legal) follow
+    // once the design language is signed off, and until then correctly 404.
+    $router->get('/', [HomeController::class, 'index']);
+
 
     /**
      * The seven routes every content module needs. Declaring them by hand eleven
