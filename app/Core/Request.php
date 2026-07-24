@@ -238,6 +238,30 @@ final class Request
         $this->params = $params;
     }
 
+    /**
+     * The API token row, set by AuthenticateApiToken once the bearer token
+     * resolves. Controllers read it to check abilities.
+     *
+     * @var array<string,mixed>|null
+     */
+    private ?array $apiToken = null;
+
+    /**
+     * @param array<string,mixed> $token
+     */
+    public function setApiToken(array $token): void
+    {
+        $this->apiToken = $token;
+    }
+
+    /**
+     * @return array<string,mixed>|null
+     */
+    public function apiToken(): ?array
+    {
+        return $this->apiToken;
+    }
+
     public function param(string $key, ?string $default = null): ?string
     {
         return $this->params[$key] ?? $default;

@@ -29,7 +29,49 @@ final class MediaLibrary
             return ['ok' => false, 'message' => $error];
         }
 
-        $mime      = self::detectMime($file['tmp_name']);
+        return self::persist((string) $file['tmp_name'], (string) $file['name'], $userId, true);
+    }
+
+    /**
+     * Stores a file already sitting on the server's own disk — an image the API
+     * fetched from a URL or decoded from base64.
+     *
+     * Kept separate from store() because those files never came through PHP's
+     * upload handling, so is_uploaded_file() and move_uploaded_file() do not apply.
+     * The MIME and size checks are identical either way.
+     *
+     * @return array{ok:bool, message?:string, id?:int}
+     */
+    public static function storeFromPath(string $path, string $originalName, ?int $userId): array
+    {
+        if (!is_file($path)) {
+            return ['ok' => false, 'message' => 'The image could not be read from disk.'];
+        }
+
+        $maxBytes = (int) config('security.uploads.max_bytes');
+
+        if (filesize($path) > $maxBytes) {
+            return ['ok' => false, 'message' => 'That image is larger than ' . round($maxBytes / 1048576, 1) . ' MB.'];
+        }
+
+        $mime    = self::detectMime($path);
+        $allowed = (array) config('security.uploads.allowed_mimes');
+
+        if (!isset($allowed[$mime])) {
+            return ['ok' => false, 'message' => 'That file type is not allowed. Accepted: JPG, PNG, WebP, GIF, SVG.'];
+        }
+
+        return self::persist($path, $originalName, $userId, false);
+    }
+
+    /**
+     * Shared storage path for both entry points.
+     *
+     * @return array{ok:bool, message?:string, id?:int}
+     */
+    private static function persist(string $sourcePath, string $originalName, ?int $userId, bool $isUpload): array
+    {
+        $mime      = self::detectMime($sourcePath);
         $allowed   = (array) config('security.uploads.allowed_mimes');
         $extension = $allowed[$mime];
 
@@ -49,15 +91,29 @@ final class MediaLibrary
 
         if ($mime === 'image/svg+xml') {
             // SVG is executable XML. Never move it verbatim.
-            $clean = self::sanitiseSvg((string) file_get_contents($file['tmp_name']));
+            $clean = self::sanitiseSvg((string) file_get_contents($sourcePath));
 
             if ($clean === null) {
                 return ['ok' => false, 'message' => 'That SVG could not be made safe to serve.'];
             }
 
             file_put_contents($absolutePath, $clean);
-        } elseif (!move_uploaded_file($file['tmp_name'], $absolutePath)) {
-            return ['ok' => false, 'message' => 'Could not save the uploaded file.'];
+
+            if (!$isUpload) {
+                @unlink($sourcePath);
+            }
+        } elseif ($isUpload) {
+            if (!move_uploaded_file($sourcePath, $absolutePath)) {
+                return ['ok' => false, 'message' => 'Could not save the uploaded file.'];
+            }
+        } elseif (!rename($sourcePath, $absolutePath)) {
+            // rename() fails across filesystems (temp dir on a different mount),
+            // so fall back to a copy before giving up.
+            if (!copy($sourcePath, $absolutePath)) {
+                return ['ok' => false, 'message' => 'Could not save the image.'];
+            }
+
+            @unlink($sourcePath);
         }
 
         @chmod($absolutePath, 0644);
@@ -90,7 +146,7 @@ final class MediaLibrary
 
         $id = Database::insert('media', [
             'filename'      => $filename,
-            'original_name' => substr((string) $file['name'], 0, 255),
+            'original_name' => substr($originalName, 0, 255),
             'path'          => $relativeDirectory . '/' . $filename,
             'mime'          => $mime,
             'size'          => (int) filesize($absolutePath),

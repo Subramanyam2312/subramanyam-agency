@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Controllers\Admin\ApiTokenController;
 use App\Controllers\Admin\AuthController;
 use App\Controllers\Admin\CaseStudyController;
 use App\Controllers\Admin\CategoryController;
@@ -18,7 +19,11 @@ use App\Controllers\Admin\SubscriberController;
 use App\Controllers\Admin\TestimonialController;
 use App\Controllers\Admin\TimelineController;
 use App\Controllers\Admin\UserController;
+use App\Controllers\Api\V1\MediaController as ApiMediaController;
+use App\Controllers\Api\V1\PostController as ApiPostController;
+use App\Controllers\Api\V1\TaxonomyController as ApiTaxonomyController;
 use App\Core\Router;
+use App\Middleware\AuthenticateApiToken;
 use App\Middleware\RequireAdmin;
 use App\Middleware\RequireAuth;
 
@@ -107,7 +112,41 @@ return function (Router $router): void {
                 $router->patch('/settings/{group:[a-z]+}', [SettingController::class, 'update']);
 
                 $resource($router, '/users', UserController::class);
+
+                $router->get('/api-tokens', [ApiTokenController::class, 'index']);
+                $router->post('/api-tokens', [ApiTokenController::class, 'store']);
+                $router->delete('/api-tokens/{id:\d+}', [ApiTokenController::class, 'destroy']);
             });
         });
+    });
+
+    /**
+     * REST API v1.
+     *
+     * Bearer-token authenticated, so it is exempt from CSRF — there is no cookie
+     * for a cross-site request to borrow. Every route sits behind
+     * AuthenticateApiToken, which also applies the per-token rate limit.
+     *
+     * No DELETE anywhere: an automated client that can create and update can
+     * unpublish by patching status, and a loop in someone's script should not be
+     * able to destroy content.
+     */
+    $router->group([
+        'prefix'     => '/api/v1',
+        'middleware' => [AuthenticateApiToken::class],
+    ], function (Router $router): void {
+        $router->get('/me', [ApiTaxonomyController::class, 'me']);
+
+        $router->get('/posts', [ApiPostController::class, 'index']);
+        $router->post('/posts', [ApiPostController::class, 'store']);
+        $router->get('/posts/{id:\d+}', [ApiPostController::class, 'show']);
+        $router->patch('/posts/{id:\d+}', [ApiPostController::class, 'update']);
+
+        $router->get('/media', [ApiMediaController::class, 'index']);
+        $router->post('/media', [ApiMediaController::class, 'store']);
+        $router->patch('/media/{id:\d+}', [ApiMediaController::class, 'update']);
+
+        $router->get('/categories', [ApiTaxonomyController::class, 'categories']);
+        $router->get('/tags', [ApiTaxonomyController::class, 'tags']);
     });
 };
