@@ -11,7 +11,7 @@
 -- ---------------------------------------------------------------- settings
 
 INSERT INTO `settings` (`setting_key`, `setting_value`, `type`, `group_name`) VALUES
-('site_name',            'Subramanyam Digital', 'text', 'general'),
+('site_name',            'SUBRAMANYAM', 'text', 'general'),
 ('tagline',              'Performance marketing for brands that are done guessing', 'text', 'general'),
 ('footer_copy',          'A independent digital marketing studio building measurable growth for founder-led brands.', 'textarea', 'general'),
 ('maintenance_mode',     '0', 'boolean', 'general'),
@@ -27,7 +27,7 @@ INSERT INTO `settings` (`setting_key`, `setting_value`, `type`, `group_name`) VA
 ('social_x',             '', 'url', 'social'),
 ('social_youtube',       '', 'url', 'social'),
 
-('seo_default_title',    'Subramanyam Digital — Performance Marketing Studio', 'text', 'seo'),
+('seo_default_title',    'SUBRAMANYAM — Performance Marketing Studio', 'text', 'seo'),
 ('seo_default_description', 'SEO, paid media and conversion work for brands that need results they can measure. Based in Chennai, working with clients everywhere.', 'textarea', 'seo'),
 ('ga_measurement_id',    '', 'text', 'seo'),
 ('gtm_id',               '', 'text', 'seo'),
@@ -63,7 +63,7 @@ INSERT INTO `page_blocks` (`page_key`, `block_key`, `label`, `type`, `value`, `g
 ('home', 'cta_button',           'Closing CTA button label', 'text',     'Book a call', 'CTA', 42),
 
 ('about', 'story_heading',       'Story heading',            'text',     'Built the long way round', 'Story', 1),
-('about', 'story_body',          'Story body',               'html',     '<p>Subramanyam Digital started as one person doing SEO audits at night and grew into a small studio that still runs the same way: senior people on the work, no account-manager layer between you and the person changing things.</p><p>We take on a limited number of engagements at a time because performance work needs attention, not volume.</p>', 'Story', 2),
+('about', 'story_body',          'Story body',               'html',     '<p>SUBRAMANYAM started as one person doing SEO audits at night and grew into a small studio that still runs the same way: senior people on the work, no account-manager layer between you and the person changing things.</p><p>We take on a limited number of engagements at a time because performance work needs attention, not volume.</p>', 'Story', 2),
 ('about', 'values_heading',      'Values heading',           'text',     'How we operate', 'Values', 10),
 ('about', 'tools_heading',       'Tools marquee heading',    'text',     'Platforms we work in daily', 'Tools', 20),
 
