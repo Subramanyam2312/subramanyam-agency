@@ -60,29 +60,9 @@ $block = static fn (string $key, string $default = ''): string => PageBlock::val
     </div>
 </section>
 
-<!-- ======================================================== TIMELINE -->
-<?php if ($timeline !== []): ?>
-    <section class="section rule" aria-labelledby="timeline-heading">
-        <div class="container-site">
-            <p class="section-index">Timeline</p>
-            <h2 id="timeline-heading" class="display-lg reveal mt-3" data-split>How we got here</h2>
-
-            <ol class="mt-14">
-                <?php foreach ($timeline as $entry): ?>
-                    <li class="reveal rule-draw grid gap-4 py-8 sm:grid-cols-12">
-                        <p class="display-md sm:col-span-3"><?= e($entry['year']) ?></p>
-                        <div class="sm:col-span-9">
-                            <h3 class="text-lg"><?= e($entry['title']) ?></h3>
-                            <?php if ($entry['description']): ?>
-                                <p class="prose-body mt-2 text-sm"><?= e($entry['description']) ?></p>
-                            <?php endif; ?>
-                        </div>
-                    </li>
-                <?php endforeach; ?>
-            </ol>
-        </div>
-    </section>
-<?php endif; ?>
+<!-- Timeline section removed from the About page at the owner's request. The
+     Timeline CMS module and its data are left intact but now display nowhere on
+     the public site. -->
 
 <!-- =========================================================== TOOLS -->
 <?php if ($logos !== []): ?>

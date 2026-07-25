@@ -13,7 +13,6 @@ use App\Models\ClientLogo;
 use App\Models\Faq;
 use App\Models\PageBlock;
 use App\Models\Service;
-use App\Models\TimelineEntry;
 
 /**
  * The pages that are essentially "render this content": services, work, about,
@@ -117,7 +116,7 @@ final class PageController extends Controller
     public function about(Request $request): Response
     {
         return $this->view('site/about', [
-            'timeline' => TimelineEntry::all(['is_active' => 1], 'sort_order ASC, id ASC'),
+            // Timeline section removed from the About page; no longer queried here.
             'logos'    => ClientLogo::withMedia(true),
             'meta'     => [
                 'title'       => 'About',
