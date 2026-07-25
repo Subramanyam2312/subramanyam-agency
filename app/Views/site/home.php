@@ -21,6 +21,11 @@ $heroPoster = $block('hero_poster');
          only on wide viewports, and never on a metered connection. -->
     <div class="hero-motion absolute inset-0 -z-20" aria-hidden="true"></div>
 
+    <!-- WebGL crystal, layered over the gradient and under the grain. Decorative,
+         so hidden from assistive tech; hero-3d.js fills it after the load event and
+         leaves it blank (gradient shows through) if WebGL is unavailable. -->
+    <canvas id="hero-canvas" class="hero-canvas -z-10" aria-hidden="true"></canvas>
+
     <?php if ($heroVideo !== ''): ?>
         <video class="hero-video -z-10" data-hero-video muted loop playsinline preload="none"
                <?= $heroPoster !== '' ? 'poster="' . e($heroPoster) . '"' : '' ?>
@@ -93,7 +98,7 @@ $heroPoster = $block('hero_poster');
 
         <ul class="mt-14 grid gap-px overflow-hidden rounded-card border border-line/70 bg-line/70 sm:grid-cols-2 lg:grid-cols-3">
             <?php foreach ($services as $service): ?>
-                <li class="reveal bg-ink transition-colors hover:bg-surface/60">
+                <li class="reveal bg-ink transition-colors hover:bg-surface/60" data-tilt>
                     <a href="/services/<?= e($service['slug']) ?>" class="group flex h-full flex-col p-7">
                         <h3 class="display-md"><?= e($service['title']) ?></h3>
                         <p class="prose-body mt-3 text-sm"><?= e($service['short_description']) ?></p>
@@ -153,7 +158,7 @@ $heroPoster = $block('hero_poster');
             <ul class="mt-14 space-y-px overflow-hidden rounded-card border border-line/70 bg-line/70">
                 <?php foreach ($caseStudies as $study): ?>
                     <?php $metrics = is_array($study['metrics']) ? $study['metrics'] : []; ?>
-                    <li class="reveal bg-ink transition-colors hover:bg-surface/60">
+                    <li class="reveal bg-ink transition-colors hover:bg-surface/60" data-tilt>
                         <a href="/work/<?= e($study['slug']) ?>"
                            class="group grid gap-6 p-7 lg:grid-cols-12 lg:items-center">
                             <div class="lg:col-span-5">
@@ -215,7 +220,7 @@ $heroPoster = $block('hero_poster');
                 data-slider-track>
                 <?php foreach ($testimonials as $testimonial): ?>
                     <li class="w-[min(30rem,85vw)] shrink-0 snap-start" data-slider-item>
-                        <figure class="card-flat flex h-full flex-col">
+                        <figure class="card-flat flex h-full flex-col" data-tilt>
                             <blockquote class="display-md leading-tight">
                                 “<?= e($testimonial['quote']) ?>”
                             </blockquote>
@@ -262,7 +267,7 @@ $heroPoster = $block('hero_poster');
 
             <ul class="mt-14 grid gap-px overflow-hidden rounded-card border border-line/70 bg-line/70 lg:grid-cols-3">
                 <?php foreach ($posts as $post): ?>
-                    <li class="reveal bg-ink transition-colors hover:bg-surface/60">
+                    <li class="reveal bg-ink transition-colors hover:bg-surface/60" data-tilt>
                         <a href="/blog/<?= e($post['slug']) ?>" class="flex h-full flex-col p-7">
                             <p class="eyebrow"><?= e($post['category_name'] ?? 'Journal') ?></p>
                             <h3 class="mt-4 text-xl leading-snug"><?= e($post['title']) ?></h3>
@@ -294,4 +299,10 @@ $heroPoster = $block('hero_poster');
     </div>
 </section>
 
+<?php $this->stop(); ?>
+
+<?php $this->start('scripts'); ?>
+<!-- WebGL crystal, home only. Self-hosted, so script-src 'self' covers it with no
+     nonce and no CSP change. -->
+<script src="<?= e(asset('/assets/js/hero-3d.js')) ?>" defer></script>
 <?php $this->stop(); ?>

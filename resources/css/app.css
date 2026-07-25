@@ -468,6 +468,30 @@
   .hero-video.is-ready {
     opacity: 0.34;
   }
+
+  /* WebGL crystal canvas. Sits full-bleed over the hero; the gem is positioned in
+     the shader, not with CSS. Fades in so an empty first frame is never seen. */
+  .hero-canvas {
+    @apply pointer-events-none absolute inset-0 h-full w-full;
+    opacity: 0;
+    animation: hero-canvas-in 1.4s ease 0.2s forwards;
+  }
+
+  /* 3D pointer tilt. Perspective lives on the parent so children rotate in depth;
+     the transform itself is written inline by site.js and cleared on leave. */
+  .tilt-scene {
+    perspective: 900px;
+  }
+
+  .tilt {
+    transform-style: preserve-3d;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+  }
+}
+
+@keyframes hero-canvas-in {
+  to { opacity: 1; }
 }
 
 @keyframes marquee-scroll {
@@ -533,6 +557,18 @@
   }
 
   #scroll-progress {
+    transition: none !important;
+  }
+
+  /* The crystal shows a single static frame under reduced motion (handled in JS);
+     here we just make sure it is visible rather than mid-fade, and kill the tilt. */
+  .hero-canvas {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+
+  .tilt {
+    transform: none !important;
     transition: none !important;
   }
 }

@@ -277,6 +277,68 @@
     window.addEventListener('resize', updateArrows);
   });
 
+  /* ---------------------------------------------------------- 3D card tilt */
+
+  /**
+   * Pointer-driven perspective tilt on cards. The card leans toward the cursor in
+   * real 3D (rotateX/rotateY under a perspective parent) and lifts slightly on the
+   * Z axis, so a grid of cards responds to the mouse with depth.
+   *
+   * Disabled entirely under reduced motion and on touch pointers — a tilt that
+   * fires on tap is just a flicker. Uses rAF so a fast mouse cannot queue more
+   * transform writes than the screen can paint.
+   */
+  (function initTilt() {
+    if (reduceMotion) {
+      return;
+    }
+
+    var MAX = 7; // degrees; past this it stops looking like paper and starts looking broken
+
+    document.querySelectorAll('[data-tilt]').forEach(function (card) {
+      var frame = null;
+
+      // Perspective is baked into the card's own transform rather than set on a
+      // parent. That keeps each card self-contained and, crucially, immune to the
+      // overflow:hidden on the surrounding hairline grid — an ancestor perspective
+      // gets flattened by that clip, a per-element one does not.
+      card.classList.add('tilt');
+
+      function onMove(event) {
+        if (event.pointerType === 'touch') {
+          return;
+        }
+        if (frame) {
+          return;
+        }
+        frame = window.requestAnimationFrame(function () {
+          frame = null;
+          var rect = card.getBoundingClientRect();
+          var px = (event.clientX - rect.left) / rect.width;   // 0..1
+          var py = (event.clientY - rect.top) / rect.height;
+          var ry = (px - 0.5) * 2 * MAX;
+          var rx = (0.5 - py) * 2 * MAX;
+          card.style.transform =
+            'perspective(900px) rotateX(' + rx.toFixed(2) + 'deg) rotateY(' + ry.toFixed(2) +
+            'deg) translateZ(6px)';
+        });
+      }
+
+      function reset() {
+        if (frame) {
+          window.cancelAnimationFrame(frame);
+          frame = null;
+        }
+        card.style.transform = '';
+      }
+
+      card.addEventListener('pointermove', onMove, { passive: true });
+      card.addEventListener('pointerleave', reset);
+      // Never leave a card frozen mid-tilt if the pointer is captured elsewhere.
+      card.addEventListener('pointercancel', reset);
+    });
+  })();
+
   /* ------------------------------------------------------- async forms */
 
   /**
