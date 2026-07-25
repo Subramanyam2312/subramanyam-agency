@@ -194,34 +194,11 @@ INSERT INTO `testimonials` (`quote`, `author_name`, `author_role`, `company`, `r
 ('Straight answers, including the ones we did not want. They told us to pause a channel that was costing us money, which cut their own fee.', 'Sneha Iyer', 'Co-founder', 'Verity Wellness', 5, 0, 1, 5);
 
 -- ---------------------------------------------------------------- case studies
-
-INSERT INTO `case_studies` (`id`, `title`, `slug`, `client_name`, `industry`, `challenge`, `solution`, `results`, `metrics`, `service_id`, `status`, `published_at`, `is_featured`, `sort_order`, `meta_title`, `meta_description`) VALUES
-(1, 'Rebuilding organic search for a B2B supplier', 'northbound-supply-seo', 'Northbound Supply', 'Industrial B2B',
- 'Organic traffic had been flat for two years despite consistent blogging. The blog ranked for informational terms that never converted, while the product pages that could sell were effectively invisible.',
- 'We remapped search intent against the actual product catalogue, consolidated 60 thin blog posts into 12 substantive guides, and rebuilt the internal linking so authority flowed to commercial pages instead of pooling in the blog archive.',
- 'Qualified organic enquiries more than tripled within seven months. Total sessions actually fell, which was the point — the traffic that remained was the traffic that bought.',
- '[{"label":"Qualified enquiries","value":"+214%"},{"label":"Pages driving revenue","value":"12 to 47"},{"label":"Time to first result","value":"7 months"}]',
- 1, 'published', '2026-04-18 10:00:00', 1, 1,
- 'Case Study — B2B Organic Search Rebuild',
- 'How consolidating thin content and rebuilding internal linking tripled qualified organic enquiries for an industrial supplier.'),
-
-(2, 'Cutting wasted ad spend by restructuring three accounts', 'kestrel-paid-media', 'Kestrel Interiors', 'Interior design',
- 'Three separate ad accounts had accumulated over four years with overlapping audiences bidding against each other. Reported ROAS looked acceptable because conversions were being counted twice.',
- 'We consolidated into a single structured account, fixed the duplicate conversion tracking, and rebuilt campaigns around margin by product category rather than by channel.',
- 'Real return was initially worse than reported, because the old number was wrong. Six months on, actual revenue per rupee spent had nearly doubled on a smaller budget.',
- '[{"label":"Return on ad spend","value":"+96%"},{"label":"Monthly budget","value":"-31%"},{"label":"Duplicate conversions removed","value":"100%"}]',
- 2, 'published', '2026-05-22 10:00:00', 1, 2,
- 'Case Study — Paid Media Account Restructure',
- 'Consolidating three overlapping ad accounts and fixing duplicate conversion tracking nearly doubled real return on ad spend.'),
-
-(3, 'A marketing site that the team can actually run', 'anchor-logistics-website', 'Anchor Logistics', 'Logistics',
- 'The existing site took four seconds to render on mobile, failed accessibility review, and every copy change needed a developer, so it simply never changed.',
- 'A hand-built front end with a performance budget, plus a custom CMS covering every editable string on the site. The team was trained in one afternoon.',
- 'Mobile load dropped below one second, the site passed WCAG 2.1 AA, and the marketing team has shipped over 90 content updates since launch without developer involvement.',
- '[{"label":"Largest Contentful Paint","value":"3.9s to 0.9s"},{"label":"Lighthouse performance","value":"41 to 98"},{"label":"Self-served updates","value":"90+"}]',
- 5, 'published', '2026-06-30 10:00:00', 1, 3,
- 'Case Study — Fast, Accessible, Self-Editable Website',
- 'Rebuilding a logistics marketing site for sub-second mobile load, WCAG 2.1 AA compliance and full team self-service.');
+--
+-- Intentionally empty. The placeholder work was removed at the owner's request;
+-- real case studies are added through the CMS (Admin → Case studies). The /work
+-- page, the home "Selected work" section and the per-service "proof" block all
+-- hide themselves when there are none, so an empty table renders cleanly.
 
 -- ---------------------------------------------------------------- timeline
 
