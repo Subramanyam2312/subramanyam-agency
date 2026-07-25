@@ -135,6 +135,28 @@ foreach (array_keys($filterSpec) as $filterKey) {
                                             <span class="text-muted" title="No" aria-label="No">—</span>
                                         <?php endif; ?>
 
+                                    <?php elseif ($type === 'score'): ?>
+                                        <?php
+                                        // RankMath traffic-light bands: 0 means no
+                                        // focus keyword set, so show a neutral dash.
+                                        $s = (int) $value;
+                                        $tone = $s === 0 ? 'muted'
+                                            : ($s >= 81 ? 'positive' : ($s >= 51 ? 'warning' : 'danger'));
+                                        $toneClass = [
+                                            'positive' => 'bg-positive/15 text-positive border-positive/30',
+                                            'warning'  => 'bg-warning/15 text-warning border-warning/30',
+                                            'danger'   => 'bg-danger/15 text-danger border-danger/30',
+                                            'muted'    => 'bg-raised text-muted border-line',
+                                        ][$tone];
+                                        ?>
+                                        <?php if ($s === 0): ?>
+                                            <span class="text-muted" title="No focus keyword set">—</span>
+                                        <?php else: ?>
+                                            <span class="inline-flex min-w-[2.5rem] justify-center rounded-full border px-2 py-0.5 text-xs tabular-nums <?= e($toneClass) ?>">
+                                                <?= e((string) $s) ?>
+                                            </span>
+                                        <?php endif; ?>
+
                                     <?php elseif ($type === 'date'): ?>
                                         <?php if ($value): ?>
                                             <time datetime="<?= e((string) $value) ?>" class="whitespace-nowrap text-muted">

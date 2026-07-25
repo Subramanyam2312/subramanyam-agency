@@ -48,6 +48,13 @@
                 <h2 class="mb-4 text-sm font-semibold">Search engine listing</h2>
 
                 <?= $this->include('partials/field', [
+                    'name'  => 'focus_keyword',
+                    'label' => 'Focus keyword',
+                    'value' => $record['focus_keyword'] ?? '',
+                    'hint'  => 'The phrase you want this post to rank for. Drives the SEO analysis on the right.',
+                ]) ?>
+
+                <?= $this->include('partials/field', [
                     'name'  => 'meta_title',
                     'label' => 'Meta title',
                     'value' => $record['meta_title'] ?? '',
@@ -92,6 +99,36 @@
 
         <!-- Sidebar -->
         <div class="space-y-6">
+            <!-- RankMath-style live SEO analysis. seo-analyzer.js posts the current
+                 field values to /admin/seo/analyze and paints the result here. -->
+            <div id="seo-panel" class="card p-5">
+                <div class="flex items-center gap-4">
+                    <div class="relative h-16 w-16 shrink-0">
+                        <svg viewBox="0 0 36 36" class="h-16 w-16 -rotate-90">
+                            <circle cx="18" cy="18" r="15.9155" fill="none"
+                                    class="text-line" stroke="currentColor" stroke-width="3"></circle>
+                            <circle cx="18" cy="18" r="15.9155" fill="none" data-seo-ring
+                                    class="text-muted" stroke="currentColor" stroke-width="3"
+                                    stroke-linecap="round" stroke-dasharray="0, 100"></circle>
+                        </svg>
+                        <span class="absolute inset-0 flex items-center justify-center text-lg font-semibold tabular-nums"
+                              data-seo-score>0</span>
+                    </div>
+                    <div>
+                        <h2 class="text-sm font-semibold">SEO analysis</h2>
+                        <p class="text-xs text-muted">
+                            Score <span data-seo-rating class="font-medium text-muted">—</span>
+                        </p>
+                    </div>
+                </div>
+
+                <p class="mt-4 text-xs text-muted" data-seo-empty>
+                    Set a focus keyword above to grade this post like RankMath does.
+                </p>
+
+                <ul class="mt-2 divide-y divide-line/60" data-seo-checks></ul>
+            </div>
+
             <div class="card p-5">
                 <h2 class="mb-4 text-sm font-semibold">Publishing</h2>
 
@@ -179,4 +216,8 @@
         </div>
     </div>
 </form>
+<?php $this->stop(); ?>
+
+<?php $this->start('scripts'); ?>
+<script src="<?= e(asset('/assets/js/seo-analyzer.js')) ?>" defer></script>
 <?php $this->stop(); ?>

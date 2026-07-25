@@ -7,6 +7,7 @@ namespace App\Controllers\Admin;
 use App\Core\Auth;
 use App\Core\Request;
 use App\Core\Sanitizer;
+use App\Core\SeoAnalyzer;
 use App\Models\Category;
 use App\Models\Media;
 use App\Models\Post;
@@ -48,6 +49,7 @@ final class PostController extends ResourceController
                 ],
             ],
             ['key' => 'category_name', 'label' => 'Category'],
+            ['key' => 'seo_score', 'label' => 'SEO', 'type' => 'score'],
             ['key' => 'published_at', 'label' => 'Published', 'type' => 'date'],
             ['key' => 'is_featured', 'label' => 'Featured', 'type' => 'bool'],
         ];
@@ -84,6 +86,7 @@ final class PostController extends ResourceController
             'meta_title'       => 'nullable|max:180',
             'meta_description' => 'nullable|max:300',
             'canonical_url'    => 'nullable|url|max:255',
+            'focus_keyword'    => 'nullable|max:191',
         ];
     }
 
@@ -113,10 +116,30 @@ final class PostController extends ResourceController
             $status = Post::STATUS_PUBLISHED;
         }
 
+        $focusKeyword   = $this->nullIfBlank((string) $request->input('focus_keyword', ''));
+        $slug           = trim((string) $request->input('slug', ''));
+        $metaTitle      = $this->nullIfBlank((string) $request->input('meta_title', ''));
+        $metaDesc       = $this->nullIfBlank((string) $request->input('meta_description', ''));
+        $excerpt        = $this->nullIfBlank((string) $request->input('excerpt', ''));
+        $title          = trim((string) $request->input('title'));
+
+        // Cache the SEO score against the same fields the live editor panel grades.
+        // The slug may be empty here and finalised later by the ResourceController,
+        // so fall back to the title for the URL check rather than scoring a blank.
+        $seoScore = SeoAnalyzer::score([
+            'focus_keyword'    => (string) $focusKeyword,
+            'title'            => $title,
+            'meta_title'       => (string) $metaTitle,
+            'excerpt'          => (string) $excerpt,
+            'meta_description' => (string) $metaDesc,
+            'slug'             => $slug !== '' ? $slug : $title,
+            'content'          => $content,
+        ]);
+
         $data = [
-            'title'             => trim((string) $request->input('title')),
-            'slug'              => trim((string) $request->input('slug', '')),
-            'excerpt'           => $this->nullIfBlank((string) $request->input('excerpt', '')),
+            'title'             => $title,
+            'slug'              => $slug,
+            'excerpt'           => $excerpt,
             'content'           => $content,
             'content_text'      => $contentText,
             'featured_media_id' => $this->nullIfBlank((string) $request->input('featured_media_id', '')),
@@ -126,10 +149,12 @@ final class PostController extends ResourceController
             'published_at'      => $publishedAt === '' ? null : date('Y-m-d H:i:s', (int) strtotime($publishedAt)),
             'reading_time'      => Sanitizer::readingTime($contentText),
             'is_featured'       => (int) $request->input('is_featured', 0),
-            'meta_title'        => $this->nullIfBlank((string) $request->input('meta_title', '')),
-            'meta_description'  => $this->nullIfBlank((string) $request->input('meta_description', '')),
+            'meta_title'        => $metaTitle,
+            'meta_description'  => $metaDesc,
             'canonical_url'     => $this->nullIfBlank((string) $request->input('canonical_url', '')),
             'noindex'           => (int) $request->input('noindex', 0),
+            'focus_keyword'     => $focusKeyword,
+            'seo_score'         => $seoScore,
         ];
 
         if ($id === null) {

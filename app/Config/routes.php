@@ -116,6 +116,9 @@ return function (Router $router): void {
             $router->post('/logout', [AuthController::class, 'logout']);
             $router->get('', [DashboardController::class, 'index']);
 
+            // Live RankMath-style SEO analysis for the editor (read-only, JSON).
+            $router->post('/seo/analyze', [\App\Controllers\Admin\SeoController::class, 'analyze']);
+
             $resource($router, '/posts', PostController::class);
             $resource($router, '/categories', CategoryController::class);
             $resource($router, '/services', ServiceController::class, true);
