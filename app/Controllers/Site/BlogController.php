@@ -158,8 +158,13 @@ final class BlogController extends Controller
         $params = [];
 
         if ($search !== '') {
-            $where[]           = '(p.title LIKE :q OR p.excerpt LIKE :q OR p.content_text LIKE :q)';
-            $params[':q']      = '%' . $search . '%';
+            // Distinct placeholders per column — a named placeholder cannot be
+            // reused under native prepared statements (HY093 otherwise).
+            $where[]        = '(p.title LIKE :q_t OR p.excerpt LIKE :q_e OR p.content_text LIKE :q_c)';
+            $like           = '%' . $search . '%';
+            $params[':q_t'] = $like;
+            $params[':q_e'] = $like;
+            $params[':q_c'] = $like;
         }
 
         if ($categoryId !== null) {

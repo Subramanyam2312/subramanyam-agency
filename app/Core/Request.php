@@ -212,6 +212,15 @@ final class Request
         return substr((string) ($this->server['HTTP_REFERER'] ?? ''), 0, 255);
     }
 
+    /**
+     * The raw query string as received, before any parsing. The firewall scans
+     * this rather than a rebuilt one, so encoding tricks are not smoothed away.
+     */
+    public function rawQueryString(): string
+    {
+        return (string) ($this->server['QUERY_STRING'] ?? '');
+    }
+
     public function isSecure(): bool
     {
         if (($this->server['HTTPS'] ?? '') !== '' && $this->server['HTTPS'] !== 'off') {

@@ -159,6 +159,12 @@ return function (Router $router): void {
                 $router->get('/settings/{group:[a-z]+}', [SettingController::class, 'edit']);
                 $router->patch('/settings/{group:[a-z]+}', [SettingController::class, 'update']);
 
+                // Tools -> Security (firewall).
+                $router->get('/security', [\App\Controllers\Admin\SecurityController::class, 'index']);
+                $router->patch('/security/settings', [\App\Controllers\Admin\SecurityController::class, 'updateSettings']);
+                $router->post('/security/block', [\App\Controllers\Admin\SecurityController::class, 'block']);
+                $router->delete('/security/block/{id:\d+}', [\App\Controllers\Admin\SecurityController::class, 'unblock']);
+
                 $resource($router, '/users', UserController::class);
 
                 $router->get('/api-tokens', [ApiTokenController::class, 'index']);

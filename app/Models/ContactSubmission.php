@@ -25,8 +25,14 @@ final class ContactSubmission extends Model
         $params = [];
 
         if (($filters['search'] ?? '') !== '') {
-            $where[]           = '(cs.name LIKE :search OR cs.email LIKE :search OR cs.company LIKE :search OR cs.message LIKE :search)';
-            $params[':search'] = '%' . $filters['search'] . '%';
+            // Distinct placeholders per column — a named placeholder cannot be
+            // reused under native prepared statements (HY093 otherwise).
+            $where[]            = '(cs.name LIKE :s_n OR cs.email LIKE :s_e OR cs.company LIKE :s_c OR cs.message LIKE :s_m)';
+            $like               = '%' . $filters['search'] . '%';
+            $params[':s_n']     = $like;
+            $params[':s_e']     = $like;
+            $params[':s_c']     = $like;
+            $params[':s_m']     = $like;
         }
 
         $state = $filters['state'] ?? '';

@@ -38,6 +38,36 @@ return [
         'decay_seconds' => 60,
     ],
 
+    'firewall' => [
+        /*
+         * A flood is counted from UNAUTHENTICATED dynamic requests only. In
+         * production Apache serves real asset files directly, so this counter
+         * ticks on genuine page hits — a human never approaches 240/min, a
+         * scraper blows past it.
+         */
+        'flood_max'    => 240,
+        'flood_window' => 60,
+
+        // Malicious hits (attack signatures, scanner agents) that accrue toward a
+        // temporary ban. Five strikes in ten minutes earns one.
+        'strike_max'    => 5,
+        'strike_window' => 600,
+
+        // How long an automatic ban lasts. Manual blocks are permanent unless an
+        // expiry is set.
+        'ban_minutes' => 60,
+
+        /*
+         * Always-allowed IPs, comma-separated, from the FIREWALL_ALLOWLIST env var.
+         * This is the escape hatch: put your office/home IP here so a bad rule or a
+         * shared-IP auto-ban can never lock you out of your own admin.
+         */
+        'allowlist' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) \App\Core\Env::get('FIREWALL_ALLOWLIST', ''))
+        ))),
+    ],
+
     'uploads' => [
         'max_bytes'     => 8 * 1024 * 1024,
         // Validated by finfo MIME sniffing, never by the filename extension.

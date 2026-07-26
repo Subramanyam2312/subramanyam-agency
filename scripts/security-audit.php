@@ -16,6 +16,7 @@ declare(strict_types=1);
 
 use App\Core\Router;
 use App\Middleware\AuthenticateApiToken;
+use App\Middleware\Firewall;
 use App\Middleware\RequireAdmin;
 use App\Middleware\RequireAuth;
 use App\Middleware\SecurityHeaders;
@@ -64,7 +65,7 @@ function check(string $label, bool $ok, string $detail = ''): void
 function registeredRoutes(): array
 {
     $router = new Router();
-    $router->globalMiddleware([SecurityHeaders::class, VerifyCsrf::class]);
+    $router->globalMiddleware([Firewall::class, SecurityHeaders::class, VerifyCsrf::class]);
 
     (require BASE_PATH . '/app/Config/routes.php')($router);
 
@@ -139,8 +140,9 @@ check(
     $leaking === [] ? '' : implode(', ', $leaking)
 );
 
-// Settings, users and API tokens must additionally require the admin role.
-$adminOnlyPrefixes = ['/admin/settings', '/admin/users', '/admin/api-tokens'];
+// Settings, users, API tokens and the firewall panel must additionally require
+// the admin role.
+$adminOnlyPrefixes = ['/admin/settings', '/admin/users', '/admin/api-tokens', '/admin/security'];
 $missingRole       = [];
 
 foreach ($routes as $route) {
@@ -203,6 +205,20 @@ check(
 check('security headers apply globally', (function () use ($routes): bool {
     foreach ($routes as $route) {
         if (!in_array(SecurityHeaders::class, $route['middleware'], true)) {
+            return false;
+        }
+    }
+
+    return true;
+})());
+
+check('firewall runs first on every route', (function () use ($routes): bool {
+    foreach ($routes as $route) {
+        // Must be present, and ahead of auth/CSRF so a blocked request is stopped
+        // before anything else runs.
+        $index = array_search(Firewall::class, $route['middleware'], true);
+
+        if ($index !== 0) {
             return false;
         }
     }

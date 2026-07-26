@@ -8,6 +8,7 @@ use App\Core\Response;
 use App\Core\Router;
 use App\Core\Session;
 use App\Core\View;
+use App\Middleware\Firewall;
 use App\Middleware\SecurityHeaders;
 use App\Middleware\VerifyCsrf;
 
@@ -62,7 +63,8 @@ Session::start($request->isSecure());
 View::share('currentPath', $request->path());
 
 $router = new Router();
-$router->globalMiddleware([SecurityHeaders::class, VerifyCsrf::class]);
+// Firewall runs first: a rejected request never reaches CSRF, auth or a controller.
+$router->globalMiddleware([Firewall::class, SecurityHeaders::class, VerifyCsrf::class]);
 
 (require BASE_PATH . '/app/Config/routes.php')($router);
 

@@ -7,6 +7,23 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    # --- Perimeter firewall ------------------------------------------------
+    # A first, cheap line of defence at the web-server level, complementing the
+    # application firewall in app/Middleware/Firewall.php. These catch the loudest
+    # probes before PHP is ever started, and match the request line only — never
+    # POST bodies — so the CMS can still submit HTML and code samples freely.
+
+    # Block the obvious injection/traversal payloads in the query string.
+    RewriteCond %{QUERY_STRING} (union[\s+]+select|information_schema|concat\s*\() [NC,OR]
+    RewriteCond %{QUERY_STRING} (<script|%3cscript|javascript:|onerror\s*=) [NC,OR]
+    RewriteCond %{QUERY_STRING} (\.\./|%2e%2e|/etc/passwd|php://|file://) [NC]
+    RewriteRule ^ - [F]
+
+    # Common CMS/probe paths this site does not have — WordPress, phpMyAdmin, etc.
+    # Refusing them cheaply keeps the logs and the app firewall quieter.
+    RewriteRule (?:^|/)(?:wp-login\.php|wp-admin|xmlrpc\.php|wp-content|wp-includes)(?:/|$) - [F,NC]
+    RewriteRule (?:^|/)(?:phpmyadmin|pma|adminer\.php|\.git|\.svn|\.aws)(?:/|$) - [F,NC]
+
     # --- HTTPS -------------------------------------------------------------
     # Hostinger terminates TLS at the proxy, so the request arrives on :80 with
     # X-Forwarded-Proto set. Checking %{HTTPS} alone causes a redirect loop there.
@@ -34,6 +51,12 @@
 
 # Directory listings off — without this, /assets/ enumerates the whole tree.
 Options -Indexes
+
+# TRACE/TRACK enable cross-site tracing; nothing here needs them.
+<IfModule mod_rewrite.c>
+    RewriteCond %{REQUEST_METHOD} ^(TRACE|TRACK)
+    RewriteRule ^ - [F]
+</IfModule>
 
 # Block dotfiles (.env, .git, editor backups) even if one is ever misplaced here.
 <FilesMatch "^\.">

@@ -17,6 +17,7 @@ declare(strict_types=1);
  */
 
 use App\Core\ActivityLogger;
+use App\Core\Firewall;
 use App\Core\RateLimiter;
 use App\Core\Sitemap;
 use App\Models\Post;
@@ -38,6 +39,9 @@ if ($published > 0) {
 }
 
 $swept = RateLimiter::sweep();
+
+// Drop expired firewall bans and trim the old event log.
+Firewall::sweep();
 
 /*
  * Rebuild the sitemap whenever this run actually published something, and on the

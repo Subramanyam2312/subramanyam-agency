@@ -63,8 +63,15 @@ final class Post extends Model
         if (($filters['search'] ?? '') !== '') {
             // LIKE rather than the FULLTEXT index: editors search for partial words
             // and half-typed slugs, which MATCH() does not handle.
-            $where[]           = '(p.title LIKE :search OR p.slug LIKE :search OR p.excerpt LIKE :search)';
-            $params[':search'] = '%' . $filters['search'] . '%';
+            //
+            // Distinct placeholders per column, not one reused three times: with
+            // native prepared statements (PDO::ATTR_EMULATE_PREPARES = false) a
+            // named placeholder may appear only once, or MySQL raises HY093.
+            $where[]            = '(p.title LIKE :search_t OR p.slug LIKE :search_s OR p.excerpt LIKE :search_e)';
+            $like               = '%' . $filters['search'] . '%';
+            $params[':search_t'] = $like;
+            $params[':search_s'] = $like;
+            $params[':search_e'] = $like;
         }
 
         if (($filters['status'] ?? '') !== '') {
