@@ -39,7 +39,7 @@ $heroPoster = $block('hero_poster');
     <div class="container-site">
         <p class="eyebrow"><?= e($block('hero_eyebrow', 'Performance marketing studio')) ?></p>
 
-        <h1 class="display-xl mt-6 max-w-[16ch]">
+        <h1 class="display-xl gilt gilt-animate mt-6 max-w-[16ch]">
             <?= e($block('hero_headline', 'Marketing that earns its line on the P&L')) ?>
         </h1>
 

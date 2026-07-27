@@ -22,7 +22,7 @@ $lede    = $lede ?? '';
             <p class="eyebrow"><?= e($eyebrow) ?></p>
         <?php endif; ?>
 
-        <h1 class="display-lg mt-5 max-w-[20ch] is-visible" data-split><?= e($heading) ?></h1>
+        <h1 class="display-lg gilt mt-5 max-w-[20ch] is-visible" data-split><?= e($heading) ?></h1>
 
         <?php if ($lede !== ''): ?>
             <p class="lede mt-7"><?= e($lede) ?></p>

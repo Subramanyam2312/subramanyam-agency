@@ -9,7 +9,7 @@ use App\Models\PageBlock;
 ?>
 <section class="section rule">
     <div class="container-site text-center">
-        <h2 class="display-lg reveal mx-auto max-w-[18ch]" data-split>
+        <h2 class="display-lg gilt reveal mx-auto max-w-[18ch]" data-split>
             <?= e(PageBlock::value('home', 'cta_heading', 'Tell us what is not working')) ?>
         </h2>
 

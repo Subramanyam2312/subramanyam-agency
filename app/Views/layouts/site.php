@@ -81,6 +81,9 @@ $noindex   = (bool) ($meta['noindex'] ?? false);
     <?= $this->include('partials/analytics') ?>
 </head>
 <body class="site min-h-screen bg-ink text-body antialiased">
+    <!-- Gilded ambient glow behind everything, fixed so it stays as the page scrolls. -->
+    <div class="site-glow" aria-hidden="true"></div>
+
     <a href="#main"
        class="sr-only focus:not-sr-only focus:absolute focus:left-5 focus:top-5 focus:z-[60]
               focus:rounded-full focus:bg-accent focus:px-5 focus:py-2.5 focus:text-ink">

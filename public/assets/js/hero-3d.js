@@ -181,21 +181,22 @@
     'void main(){' +
     '  vec3 N = normalize(vN);' +
     '  vec3 V = normalize(-vView);' +
-    // A key light and a cooler back-fill, so adjacent facets read at different
-    // brightnesses and the form turns as it rotates rather than flattening out.
+    // A warm champagne key light and a cooler back-fill, so adjacent facets read
+    // at different brightnesses and the gem turns rather than flattening out.
     '  vec3 L1 = normalize(vec3(0.45, 0.75, 0.55));' +
     '  vec3 L2 = normalize(vec3(-0.5, -0.25, 0.35));' +
     '  float d1 = max(dot(N, L1), 0.0);' +
     '  float d2 = max(dot(N, L2), 0.0);' +
-    // near-black facet body so it reads against the dark hero
-    '  vec3 base = vec3(0.06, 0.065, 0.078);' +
-    '  vec3 col = base + base * d1 * 1.5 + base * d2 * 0.7;' +
-    // bone fresnel rim — the premium edge glow, wider and brighter than before
-    '  float fres = pow(1.0 - max(dot(N, V), 0.0), 2.3);' +
-    '  col += uAccent * fres * 1.15;' +
-    // sharp per-facet glints that catch as it turns
-    '  col += uAccent * pow(d1, 16.0) * 0.35;' +
-    '  gl_FragColor = vec4(col, 0.95);' +
+    // near-black facet body with a faint warm cast, so it reads as obsidian, not grey
+    '  vec3 base = vec3(0.07, 0.062, 0.052);' +
+    '  vec3 warm = uAccent * 0.5 + vec3(0.02);' +
+    '  vec3 col = base + warm * d1 * 1.6 + base * d2 * 0.7;' +
+    // champagne fresnel rim — the gilded edge glow, wide and bright
+    '  float fres = pow(1.0 - max(dot(N, V), 0.0), 2.1);' +
+    '  col += uAccent * fres * 1.35;' +
+    // sharp per-facet gold glints that catch as it turns
+    '  col += uAccent * pow(d1, 18.0) * 0.5;' +
+    '  gl_FragColor = vec4(col, 0.96);' +
     '}';
 
   function compile(type, src) {
@@ -280,10 +281,18 @@
     };
   }
 
-  function drawFrame(rotY, rotX) {
+  function drawFrame(rotY, rotX, scale) {
     var place = objectPlacement();
 
     var model = rotationYX(rotY, rotX);
+
+    // Uniform breathing scale. Safe to bake into the model because the shader
+    // re-normalises the transformed normal, so a uniform scale cancels there.
+    if (scale && scale !== 1) {
+      for (var i = 0; i < 3; i++) {
+        model[i] *= scale; model[4 + i] *= scale; model[8 + i] *= scale;
+      }
+    }
     var view = translation(place.x, place.y, -place.dist);
     var modelView = multiply(view, model);
     var mvp = multiply(proj, modelView);
@@ -302,8 +311,9 @@
     gl.uniformMatrix4fv(uMVP, false, mvp);
     gl.uniformMatrix4fv(uModelView, false, modelView);
     gl.uniformMatrix3fv(uNormal, false, mat3FromMat4(model));
-    // Bone accent, linearised to sit right against the dark facets.
-    gl.uniform3f(uAccent, 0.82, 0.78, 0.70);
+    // Champagne gold, linearised to sit right against the dark facets — the gem's
+    // edges and glints read as gilt rather than the earlier bone.
+    gl.uniform3f(uAccent, 0.86, 0.66, 0.36);
 
     gl.drawArrays(gl.TRIANGLES, 0, mesh.count);
   }
@@ -323,8 +333,9 @@
 
     var rotY = t * 0.22 + driftX * 0.5;
     var rotX = Math.sin(t * 0.35) * 0.18 + driftY * 0.4;
+    var scale = 1 + Math.sin(t * 0.5) * 0.03; // gentle 3% breathe
 
-    drawFrame(rotY, rotX);
+    drawFrame(rotY, rotX, scale);
     window.requestAnimationFrame(loop);
   }
 

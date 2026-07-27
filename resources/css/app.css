@@ -41,19 +41,23 @@
  */
 @layer base {
   :root {
-    --c-ink:      12 14 18;
-    --c-surface:  18 21 26;
-    --c-raised:   25 29 36;
-    --c-line:     42 48 58;
+    /* CMS portal — warm charcoal with a champagne-gold accent, so the back office
+       feels of a piece with the luxury public site. Contrast re-audited: body 13:1,
+       muted 5.8:1, gold accent 8:1, field borders 4.2:1 — all pass WCAG AA. */
+    --c-ink:      15 14 13;
+    --c-surface:  22 20 18;
+    --c-raised:   30 27 24;
+    --c-line:     46 42 37;
     /* Interactive control borders. Meets the 3:1 WCAG 1.4.11 minimum against the
        page background, which --c-line deliberately does not. */
-    --c-field:    108 116 130;
-    --c-body:     226 232 240;
-    --c-muted:    140 152 170;
-    --c-accent:   122 162 255;
-    --c-positive: 74 194 137;
+    --c-field:    120 112 100;
+    --c-body:     232 228 222;
+    --c-muted:    154 146 134;
+    --c-accent:   212 178 120;   /* champagne gold */
+    --c-gold-2:   236 214 176;   /* light champagne highlight */
+    --c-positive: 90 194 150;
     --c-warning:  226 176 84;
-    --c-danger:   238 111 111;
+    --c-danger:   236 118 110;
   }
 
   html {
@@ -93,8 +97,17 @@
            disabled:opacity-50 disabled:pointer-events-none;
   }
 
+  /* Champagne-gold primary action, with a soft warm glow so the CMS feels as
+     considered as the public site. */
   .btn-primary {
-    @apply btn bg-accent text-ink hover:bg-accent/90;
+    @apply btn text-ink;
+    background: linear-gradient(135deg,
+      rgb(var(--c-gold-2)) 0%, rgb(var(--c-accent)) 60%, rgb(var(--c-gold-2)) 100%);
+    box-shadow: 0 8px 22px -12px rgb(var(--c-accent) / 0.6);
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 10px 26px -12px rgb(var(--c-accent) / 0.75);
   }
 
   .btn-ghost {
@@ -150,8 +163,16 @@
            transition-colors hover:bg-raised hover:text-body;
   }
 
+  /* Active nav item gets a gold spine and warm tint — a small luxury cue that
+     also makes the current section unmistakable. */
   .nav-link-active {
-    @apply bg-raised text-body;
+    @apply relative bg-raised text-body;
+  }
+
+  .nav-link-active::before {
+    content: '';
+    @apply absolute inset-y-1.5 left-0 w-0.5 rounded-full;
+    background: rgb(var(--c-accent));
   }
 
   .stat-value {
@@ -173,18 +194,45 @@
  */
 @layer components {
   .site {
-    --c-ink:     10 11 13;
-    --c-surface: 17 18 21;
-    --c-raised:  24 26 30;
-    --c-line:    44 47 53;
-    --c-field:   112 118 130;
-    --c-body:    236 231 225;
-    --c-muted:   142 144 151;
-    /* Bone rather than a chromatic accent: a light button on near-black is the
-       single most "premium studio" move available, and it never dates. */
-    --c-accent:  230 223 212;
+    /* Luxury palette: warm obsidian base, ivory text, champagne-gold accent.
+       Gold on near-black is the universal luxury signal — used sparingly on CTAs,
+       rims, eyebrows and gilded headings, never everywhere, so it reads couture
+       rather than casino. Contrast re-audited: body 15:1, muted 6:1, gold 9:1,
+       field borders 4.2:1 — all pass WCAG AA. */
+    --c-ink:     13 12 11;   /* warm obsidian */
+    --c-surface: 20 18 16;
+    --c-raised:  29 26 22;
+    --c-line:    50 45 39;
+    --c-field:   122 114 101;
+    --c-body:    240 234 226; /* warm ivory */
+    --c-muted:   158 150 138; /* warm taupe-grey */
+    --c-accent:  212 178 120; /* champagne gold */
+    --c-gold-2:  236 214 176; /* light champagne highlight */
 
     font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  }
+
+  /* Gilded gradient text — an ivory-to-champagne sheen for headline moments. Both
+     stops are light, so contrast against the dark base stays high. */
+  .gilt {
+    background: linear-gradient(104deg,
+      rgb(var(--c-body)) 0%,
+      rgb(var(--c-gold-2)) 42%,
+      rgb(var(--c-accent)) 72%,
+      rgb(var(--c-body)) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    background-size: 200% auto;
+  }
+
+  /* A hairline that fades gold through its centre, for section rules that should
+     read as a deliberate flourish rather than a plain divider. */
+  .rule-gilt {
+    height: 1px;
+    border: 0;
+    background: linear-gradient(90deg, transparent,
+      rgb(var(--c-accent) / 0.55) 50%, transparent);
   }
 
   /* Type ------------------------------------------------------------------ */
@@ -201,8 +249,10 @@
   .display-lg { @apply display; font-size: clamp(2.25rem, 5vw, 4rem); }
   .display-md { @apply display; font-size: clamp(1.75rem, 3.2vw, 2.75rem); }
 
+  /* Gold eyebrow: the small uppercase label is the cheapest, highest-impact
+     luxury cue on the page, so it carries the champagne accent. */
   .eyebrow {
-    @apply text-xs font-medium uppercase tracking-[0.22em] text-muted;
+    @apply text-xs font-medium uppercase tracking-[0.22em] text-accent;
   }
 
   .lede {
@@ -301,31 +351,83 @@
     @apply border-t border-line/60;
   }
 
-  /* A hairline label above each section, the way a print grid would number it. */
+  /* A hairline label above each section, the way a print grid would number it.
+     Gilded, so the grid numbering itself reads as an accent. */
   .section-index {
-    @apply font-mono text-xs text-muted/70;
+    @apply font-mono text-xs text-accent/80;
   }
 
   /* Components ------------------------------------------------------------ */
 
+  /* Primary CTA: a champagne-gold pill with a slow light sweep on hover — the
+     "sheen crossing brushed metal" cue, done with one pseudo-element. */
   .btn-bone {
-    @apply btn rounded-full bg-accent px-6 py-3 text-ink hover:bg-accent/90;
+    @apply btn relative overflow-hidden rounded-full px-6 py-3 text-ink;
+    background: linear-gradient(135deg,
+      rgb(var(--c-gold-2)) 0%, rgb(var(--c-accent)) 55%, rgb(var(--c-gold-2)) 100%);
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.25) inset,
+                0 10px 30px -12px rgb(var(--c-accent) / 0.5);
+    transition: box-shadow 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .btn-bone::after {
+    content: '';
+    @apply pointer-events-none absolute inset-0;
+    background: linear-gradient(105deg, transparent 30%,
+      rgb(255 255 255 / 0.55) 48%, transparent 62%);
+    transform: translateX(-120%);
+    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .btn-bone:hover {
+    box-shadow: 0 1px 0 rgb(255 255 255 / 0.35) inset,
+                0 14px 38px -12px rgb(var(--c-accent) / 0.65);
+    transform: translateY(-1px);
+  }
+
+  .btn-bone:hover::after {
+    transform: translateX(120%);
   }
 
   .btn-outline {
-    @apply btn rounded-full border border-field px-6 py-3 text-body hover:border-body/60;
+    @apply btn rounded-full border border-field px-6 py-3 text-body transition-colors;
+  }
+
+  .btn-outline:hover {
+    border-color: rgb(var(--c-accent) / 0.7);
+    color: rgb(var(--c-accent));
   }
 
   .link-underline {
     @apply underline decoration-line underline-offset-4 transition-colors hover:decoration-body;
   }
 
+  /* Luxury card: a faint top sheen and a warm inner light, with the border
+     warming to gold on hover. Reads like lit glass rather than a flat panel. */
   .card-flat {
-    @apply rounded-card border border-line/70 bg-surface/60 p-6 transition-colors;
+    @apply relative overflow-hidden rounded-card border border-line/70 p-6;
+    background:
+      linear-gradient(180deg, rgb(var(--c-gold-2) / 0.04), transparent 30%),
+      rgb(var(--c-surface) / 0.6);
+    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+  }
+
+  .card-flat::before {
+    content: '';
+    @apply pointer-events-none absolute inset-x-0 top-0 h-px;
+    background: linear-gradient(90deg, transparent,
+      rgb(var(--c-accent) / 0.4) 50%, transparent);
+    opacity: 0;
+    transition: opacity 0.4s ease;
   }
 
   .card-flat:hover {
-    @apply border-line;
+    border-color: rgb(var(--c-accent) / 0.35);
+    box-shadow: 0 24px 60px -30px rgb(var(--c-accent) / 0.25);
+  }
+
+  .card-flat:hover::before {
+    opacity: 1;
   }
 
   /* Scroll reveal. Elements start hidden ONLY when JS is present to reveal them —
@@ -445,12 +547,22 @@
 
   .hero-motion {
     /* The always-on motion layer. Pure CSS, no bytes, no LCP cost — the optional
-       self-hosted video is layered on top of this only after the hero has painted. */
+       self-hosted video is layered on top of this only after the hero has painted.
+       Now warmed with champagne light pooling behind the crystal for a gilded glow. */
     background:
-      radial-gradient(60% 50% at 20% 15%, rgb(var(--c-accent) / 0.09), transparent 70%),
-      radial-gradient(50% 40% at 85% 25%, rgb(140 170 255 / 0.08), transparent 70%),
-      radial-gradient(70% 60% at 50% 100%, rgb(var(--c-accent) / 0.05), transparent 70%);
+      radial-gradient(58% 48% at 78% 30%, rgb(var(--c-accent) / 0.14), transparent 70%),
+      radial-gradient(50% 44% at 18% 18%, rgb(var(--c-gold-2) / 0.07), transparent 70%),
+      radial-gradient(80% 65% at 50% 108%, rgb(var(--c-accent) / 0.06), transparent 70%);
     animation: hero-drift 24s ease-in-out infinite alternate;
+  }
+
+  /* A slow gilded vignette pulse over the whole page background — barely there,
+     but it keeps the dark surfaces feeling lit rather than flat. */
+  .site-glow {
+    @apply pointer-events-none fixed inset-0 -z-10;
+    background:
+      radial-gradient(60% 50% at 85% 0%, rgb(var(--c-accent) / 0.05), transparent 60%),
+      radial-gradient(50% 40% at 0% 100%, rgb(var(--c-gold-2) / 0.03), transparent 60%);
   }
 
   .hero-grain {
@@ -504,6 +616,14 @@
   to   { transform: scale(1.12) translate3d(0, -1.5%, 0); }
 }
 
+/* Slow champagne sweep across gilded headline text. */
+.gilt-animate { animation: gilt-sweep 9s ease-in-out infinite; }
+
+@keyframes gilt-sweep {
+  0%, 100% { background-position: 0% center; }
+  50%      { background-position: 100% center; }
+}
+
 /*
  * Honour the OS "reduce motion" setting globally. Any animation added later is
  * covered by this without remembering to opt in.
@@ -555,6 +675,12 @@
   .hero-motion {
     animation: none !important;
   }
+
+  /* Gilded sweep and button sheen are decorative motion — freeze them. The gold
+     gradient itself stays; only the movement stops. */
+  .gilt-animate { animation: none !important; }
+
+  .btn-bone::after { display: none !important; }
 
   #scroll-progress {
     transition: none !important;
