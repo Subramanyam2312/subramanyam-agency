@@ -87,6 +87,18 @@ final class Response
         return $this;
     }
 
+    public function getHeader(string $name): ?string
+    {
+        // Case-insensitive lookup, since header names are compared loosely.
+        foreach ($this->headers as $key => $value) {
+            if (strcasecmp($key, $name) === 0) {
+                return $value;
+            }
+        }
+
+        return null;
+    }
+
     public function status(int $status): self
     {
         $this->status = $status;

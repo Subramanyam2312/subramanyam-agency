@@ -327,6 +327,8 @@ abstract class ResourceController extends Controller
     {
         if ($this->affectsSitemap) {
             Sitemap::generate();
+            // Published content changed — any cached HTML is now stale.
+            \App\Core\PageCache::purge();
         }
     }
 

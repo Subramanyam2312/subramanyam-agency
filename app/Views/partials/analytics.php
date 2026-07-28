@@ -16,8 +16,17 @@ use App\Models\Setting;
  *    policy to Google's domains ONLY when an ID is present — the strict policy
  *    is the default, not the exception.
  */
-$ga4 = trim((string) Setting::get('ga_measurement_id', ''));
-$gtm = trim((string) Setting::get('gtm_id', ''));
+$analyticsOn = Setting::bool('plugin_analytics_enabled', true);
+
+$ga4   = $analyticsOn ? trim((string) Setting::get('ga_measurement_id', '')) : '';
+$gtm   = $analyticsOn ? trim((string) Setting::get('gtm_id', '')) : '';
+$pixel = ($analyticsOn && Setting::bool('meta_pixel_enabled', false))
+    ? trim((string) Setting::get('meta_pixel_id', '')) : '';
+
+// Custom head code is inserted verbatim — it is an admin-only, deliberately raw
+// injection point (the "custom code" plugin), never populated from public input.
+$customHead = ($analyticsOn && Setting::bool('custom_head_enabled', false))
+    ? (string) Setting::get('custom_head_code', '') : '';
 
 // Never measure our own sessions.
 if (Auth::check()) {
@@ -31,6 +40,10 @@ if ($ga4 !== '' && preg_match('/^G-[A-Z0-9]{6,}$/i', $ga4) !== 1) {
 
 if ($gtm !== '' && preg_match('/^GTM-[A-Z0-9]{4,}$/i', $gtm) !== 1) {
     $gtm = '';
+}
+
+if ($pixel !== '' && preg_match('/^\d{6,20}$/', $pixel) !== 1) {
+    $pixel = '';
 }
 ?>
 <?php if ($gtm !== ''): ?>
@@ -52,4 +65,25 @@ if ($gtm !== '' && preg_match('/^GTM-[A-Z0-9]{4,}$/i', $gtm) !== 1) {
         gtag('js', new Date());
         gtag('config', '<?= e($ga4) ?>', { anonymize_ip: true });
     </script>
+<?php endif; ?>
+
+<?php if ($pixel !== ''): ?>
+    <!-- Meta (Facebook) Pixel. Loaded from connect.facebook.net; the CSP widens to
+         Meta's hosts only when a valid pixel id is set. -->
+    <script nonce="<?= e(csp_nonce()) ?>">
+        !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
+        n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;t.setAttribute('nonce','<?= e(csp_nonce()) ?>');
+        s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,
+        'script','https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init','<?= e($pixel) ?>');fbq('track','PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+        src="https://www.facebook.com/tr?id=<?= e($pixel) ?>&ev=PageView&noscript=1"></noscript>
+<?php endif; ?>
+
+<?php if (trim($customHead) !== ''): ?>
+    <!-- Custom head code (Tools -> Plugins). Admin-authored, output verbatim. -->
+    <?= $customHead ?>
 <?php endif; ?>

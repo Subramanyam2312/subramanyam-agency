@@ -142,6 +142,7 @@ final class PostController extends ApiController
         // An agent publishing a post should get it into the sitemap immediately,
         // exactly as the CMS does.
         Sitemap::generate();
+        \App\Core\PageCache::purge();
 
         $this->log('api.post_created', 'posts', $id, ['title' => $request->input('title')]);
 
@@ -247,6 +248,7 @@ final class PostController extends ApiController
         }
 
         Sitemap::generate();
+        \App\Core\PageCache::purge();
 
         $this->log('api.post_updated', 'posts', $id, ['fields' => array_keys($data)]);
 

@@ -9,6 +9,7 @@ use App\Core\Router;
 use App\Core\Session;
 use App\Core\View;
 use App\Middleware\Firewall;
+use App\Middleware\PageOptimise;
 use App\Middleware\SecurityHeaders;
 use App\Middleware\VerifyCsrf;
 
@@ -64,7 +65,14 @@ View::share('currentPath', $request->path());
 
 $router = new Router();
 // Firewall runs first: a rejected request never reaches CSRF, auth or a controller.
-$router->globalMiddleware([Firewall::class, SecurityHeaders::class, VerifyCsrf::class]);
+// PageOptimise (cache + traffic) sits after SecurityHeaders so cached responses
+// still receive the full header set on the way back out.
+$router->globalMiddleware([
+    Firewall::class,
+    SecurityHeaders::class,
+    PageOptimise::class,
+    VerifyCsrf::class,
+]);
 
 (require BASE_PATH . '/app/Config/routes.php')($router);
 

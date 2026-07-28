@@ -125,5 +125,13 @@ $noindex   = (bool) ($meta['noindex'] ?? false);
     <script src="<?= e(asset('/assets/js/site.js')) ?>" defer></script>
 
     <?= $this->yieldSection('scripts') ?>
+
+    <?php if (!\App\Core\Auth::check()
+        && \App\Models\Setting::bool('plugin_analytics_enabled', true)
+        && \App\Models\Setting::bool('custom_body_enabled', false)
+        && trim((string) \App\Models\Setting::get('custom_body_code', '')) !== ''): ?>
+        <!-- Custom body code (Tools -> Plugins). Admin-authored, output verbatim. -->
+        <?= \App\Models\Setting::get('custom_body_code') ?>
+    <?php endif; ?>
 </body>
 </html>

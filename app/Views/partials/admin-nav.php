@@ -44,8 +44,10 @@ $groups = [
     [
         'label' => 'Configuration',
         'items' => [
-            ['label' => 'Settings',   'href' => '/admin/settings',   'icon' => 'cog',   'admin_only' => true],
-            ['label' => 'Users',      'href' => '/admin/users',      'icon' => 'users', 'admin_only' => true],
+            ['label' => 'Plugins',    'href' => '/admin/plugins',    'icon' => 'plug',   'admin_only' => true],
+            ['label' => 'Traffic',    'href' => '/admin/traffic',    'icon' => 'chart',  'admin_only' => true],
+            ['label' => 'Settings',   'href' => '/admin/settings',   'icon' => 'cog',    'admin_only' => true],
+            ['label' => 'Users',      'href' => '/admin/users',      'icon' => 'users',  'admin_only' => true],
             ['label' => 'API tokens', 'href' => '/admin/api-tokens', 'icon' => 'key',    'admin_only' => true],
             ['label' => 'Security',   'href' => '/admin/security',   'icon' => 'shield', 'admin_only' => true],
         ],
@@ -70,6 +72,8 @@ $icons = [
     'users'  => '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9"/>',
     'key'    => '<circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.7 12.3 8.3-8.3M17 6l3 3M14 9l3 3"/>',
     'shield' => '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
+    'plug'   => '<path d="M9 2v6M15 2v6M6 8h12v3a6 6 0 0 1-12 0zM12 17v5"/>',
+    'chart'  => '<path d="M3 3v18h18M8 15v4M13 11v8M18 7v12"/>',
     'logout' => '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
 ];
 

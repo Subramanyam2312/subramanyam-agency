@@ -43,6 +43,13 @@ $swept = RateLimiter::sweep();
 // Drop expired firewall bans and trim the old event log.
 Firewall::sweep();
 
+// Prune old traffic visitor hashes. If posts went live this run, drop cached pages.
+\App\Core\Traffic::sweep();
+
+if ($published > 0) {
+    \App\Core\PageCache::purge();
+}
+
 /*
  * Rebuild the sitemap whenever this run actually published something, and on the
  * nightly run regardless — that second case is the safety net for a write that

@@ -165,6 +165,15 @@ return function (Router $router): void {
                 $router->post('/security/block', [\App\Controllers\Admin\SecurityController::class, 'block']);
                 $router->delete('/security/block/{id:\d+}', [\App\Controllers\Admin\SecurityController::class, 'unblock']);
 
+                // Tools -> Plugins (SEO, analytics, traffic, spam, cache).
+                $router->get('/plugins', [\App\Controllers\Admin\PluginController::class, 'index']);
+                $router->patch('/plugins', [\App\Controllers\Admin\PluginController::class, 'update']);
+                $router->post('/plugins/purge-cache', [\App\Controllers\Admin\PluginController::class, 'purgeCache']);
+                $router->post('/plugins/verify-akismet', [\App\Controllers\Admin\PluginController::class, 'verifyAkismet']);
+
+                // Tools -> Traffic (Traffic Manager dashboard).
+                $router->get('/traffic', [\App\Controllers\Admin\TrafficController::class, 'index']);
+
                 $resource($router, '/users', UserController::class);
 
                 $router->get('/api-tokens', [ApiTokenController::class, 'index']);

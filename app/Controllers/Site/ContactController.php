@@ -13,6 +13,7 @@ use App\Core\Request;
 use App\Core\Response;
 use App\Core\Sanitizer;
 use App\Core\Session;
+use App\Core\SpamGuard;
 use App\Core\Validator;
 use App\Models\Service;
 use App\Models\Setting;
@@ -82,6 +83,23 @@ final class ContactController extends Controller
 
         RateLimiter::hit($throttleKey, (int) config('security.contact.decay_seconds', 3600));
 
+        // Spam scoring (honeypot + rate limit already passed above). A hard block
+        // is answered with the normal success message so a bot gets no signal; a
+        // 'spam' verdict is stored but flagged and never emailed onward.
+        $spam = SpamGuard::check([
+            'name'    => (string) $request->input('name'),
+            'email'   => (string) $request->input('email'),
+            'message' => (string) $request->input('message'),
+        ], $request);
+
+        if ($spam['verdict'] === 'block') {
+            ActivityLogger::log('contact.spam_blocked', 'contact_submissions', null, ['reason' => $spam['reason']]);
+
+            return $this->done($request, 'Thanks — your message is with us. We reply to everything within one working day.');
+        }
+
+        $isSpam = $spam['verdict'] === 'spam';
+
         $serviceId = $request->input('service_id');
 
         $id = Database::insert('contact_submissions', [
@@ -94,15 +112,19 @@ final class ContactController extends Controller
             // Stored as plain text: this is a record of what someone typed, and it
             // is rendered escaped. Nothing here should ever be interpreted as markup.
             'message'      => Sanitizer::plain((string) $request->input('message')),
+            'is_spam'      => $isSpam ? 1 : 0,
             'ip_hash'      => $request->ipHash(),
             'user_agent'   => $request->userAgent(),
             'referrer'     => $request->referer(),
             'created_at'   => date('Y-m-d H:i:s'),
         ]);
 
-        ActivityLogger::log('contact.received', 'contact_submissions', $id);
+        ActivityLogger::log($isSpam ? 'contact.spam_flagged' : 'contact.received', 'contact_submissions', $id);
 
-        $this->notify($request, $id);
+        // Only a genuine enquiry is emailed onward.
+        if (!$isSpam) {
+            $this->notify($request, $id);
+        }
 
         return $this->done($request, 'Thanks — your message is with us. We reply to everything within one working day.');
     }

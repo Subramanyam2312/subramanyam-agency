@@ -142,7 +142,8 @@ check(
 
 // Settings, users, API tokens and the firewall panel must additionally require
 // the admin role.
-$adminOnlyPrefixes = ['/admin/settings', '/admin/users', '/admin/api-tokens', '/admin/security'];
+$adminOnlyPrefixes = ['/admin/settings', '/admin/users', '/admin/api-tokens', '/admin/security',
+    '/admin/plugins', '/admin/traffic'];
 $missingRole       = [];
 
 foreach ($routes as $route) {

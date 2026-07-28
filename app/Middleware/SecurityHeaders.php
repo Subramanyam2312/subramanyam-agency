@@ -82,6 +82,14 @@ final class SecurityHeaders implements Middleware
                 . ' https://region1.google-analytics.com';
         }
 
+        // Meta Pixel widens the policy to Facebook's hosts, again only when a valid
+        // pixel id is configured.
+        if (!str_starts_with($request->path(), '/admin') && $this->metaPixelEnabled()) {
+            $directives['script-src']  .= ' https://connect.facebook.net';
+            $directives['img-src']     .= ' https://www.facebook.com https://connect.facebook.net';
+            $directives['connect-src'] .= ' https://www.facebook.com';
+        }
+
         $parts = [];
 
         foreach ($directives as $directive => $value) {
@@ -106,7 +114,24 @@ final class SecurityHeaders implements Middleware
             return false;
         }
 
+        if (!Setting::bool('plugin_analytics_enabled', true)) {
+            return false;
+        }
+
         return preg_match('/^G-[A-Z0-9]{6,}$/i', $ga4) === 1
             || preg_match('/^GTM-[A-Z0-9]{4,}$/i', $gtm) === 1;
+    }
+
+    private function metaPixelEnabled(): bool
+    {
+        try {
+            if (!Setting::bool('plugin_analytics_enabled', true) || !Setting::bool('meta_pixel_enabled', false)) {
+                return false;
+            }
+
+            return preg_match('/^\d{6,20}$/', trim((string) Setting::get('meta_pixel_id', ''))) === 1;
+        } catch (Throwable) {
+            return false;
+        }
     }
 }
