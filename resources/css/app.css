@@ -79,6 +79,18 @@
   ::selection {
     @apply bg-accent/30;
   }
+
+  /*
+   * Native form controls default to the browser's blue tick/fill. accent-color
+   * repaints checkboxes, radios and range thumbs in champagne gold so they match
+   * the rest of the theme. --c-accent is redefined inside .site, so public-page
+   * controls inherit the same gold without a second rule.
+   */
+  input[type='checkbox'],
+  input[type='radio'],
+  input[type='range'] {
+    accent-color: rgb(var(--c-accent));
+  }
 }
 
 @layer components {
