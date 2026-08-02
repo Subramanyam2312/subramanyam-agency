@@ -10,6 +10,12 @@ $block = static fn (string $key, string $default = ''): string => PageBlock::val
 
 $heroVideo  = $block('hero_video');
 $heroPoster = $block('hero_poster');
+
+/* Founder portrait for the hero scene. Cache-busted by file mtime so swapping
+   the photo never serves a stale copy. Falls back to hiding the scene if absent. */
+$founderPath = '/uploads/founder/founder.jpg';
+$founderFile = PUBLIC_PATH . $founderPath;
+$founderImg  = is_file($founderFile) ? $founderPath . '?v=' . filemtime($founderFile) : '';
 ?>
 
 <?php $this->start('content'); ?>
@@ -23,8 +29,12 @@ $heroPoster = $block('hero_poster');
 
     <!-- WebGL crystal, layered over the gradient and under the grain. Decorative,
          so hidden from assistive tech; hero-3d.js fills it after the load event and
-         leaves it blank (gradient shows through) if WebGL is unavailable. -->
-    <canvas id="hero-canvas" class="hero-canvas -z-10" aria-hidden="true"></canvas>
+         leaves it blank (gradient shows through) if WebGL is unavailable.
+         Suppressed when a founder portrait is present — that scene carries the
+         hero's gold, and running both reads as clutter. -->
+    <?php if ($founderImg === ''): ?>
+        <canvas id="hero-canvas" class="hero-canvas -z-10" aria-hidden="true"></canvas>
+    <?php endif; ?>
 
     <?php if ($heroVideo !== ''): ?>
         <video class="hero-video -z-10" data-hero-video muted loop playsinline preload="none"
@@ -37,23 +47,82 @@ $heroPoster = $block('hero_poster');
          aria-hidden="true"></div>
 
     <div class="container-site">
-        <p class="eyebrow"><?= e($block('hero_eyebrow', 'Performance marketing studio')) ?></p>
+        <div class="grid items-center gap-10 <?= $founderImg !== '' ? 'lg:grid-cols-[1.05fr_0.92fr] lg:gap-14' : '' ?>">
+            <div class="relative z-10">
+                <p class="eyebrow"><?= e($block('hero_eyebrow', 'Performance marketing studio')) ?></p>
 
-        <h1 class="display-xl gilt gilt-animate mt-6 max-w-[16ch]">
-            <?= e($block('hero_headline', 'Marketing that earns its line on the P&L')) ?>
-        </h1>
+                <h1 class="display-xl gilt gilt-animate mt-6 max-w-[16ch]">
+                    <?= e($block('hero_headline', 'Marketing that earns its line on the P&L')) ?>
+                </h1>
 
-        <p class="lede mt-8">
-            <?= e($block('hero_subheadline')) ?>
-        </p>
+                <p class="lede mt-8">
+                    <?= e($block('hero_subheadline')) ?>
+                </p>
 
-        <div class="mt-10 flex flex-wrap items-center gap-3">
-            <a href="<?= e($block('hero_cta_primary_href', '/contact')) ?>" class="btn-bone">
-                <?= e($block('hero_cta_primary', 'Start a project')) ?>
-            </a>
-            <a href="<?= e($block('hero_cta_secondary_href', '/work')) ?>" class="btn-outline">
-                <?= e($block('hero_cta_secondary', 'See the work')) ?>
-            </a>
+                <div class="mt-10 flex flex-wrap items-center gap-3">
+                    <a href="<?= e($block('hero_cta_primary_href', '/contact')) ?>" class="btn-bone">
+                        <?= e($block('hero_cta_primary', 'Start a project')) ?>
+                    </a>
+                    <a href="<?= e($block('hero_cta_secondary_href', '/work')) ?>" class="btn-outline">
+                        <?= e($block('hero_cta_secondary', 'See the work')) ?>
+                    </a>
+                </div>
+            </div>
+
+            <?php if ($founderImg !== ''): ?>
+                <!-- Founder 3D scroll scene. Decorative motifs are hidden from AT; the
+                     portrait keeps a real alt. hero-founder.js drives the parallax/tilt. -->
+                <div class="founder-scene" data-founder>
+                    <div class="founder-stage" data-founder-stage>
+                        <div class="founder-grid" aria-hidden="true"></div>
+
+                        <svg class="founder-chart" viewBox="0 0 320 200" preserveAspectRatio="none" aria-hidden="true">
+                            <defs>
+                                <linearGradient id="fchart-line" x1="0" y1="0" x2="1" y2="0">
+                                    <stop offset="0" stop-color="rgb(212 178 120 / 0.35)"/>
+                                    <stop offset="0.6" stop-color="rgb(236 214 176)"/>
+                                    <stop offset="1" stop-color="rgb(212 178 120)"/>
+                                </linearGradient>
+                                <linearGradient id="fchart-fill" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0" stop-color="rgb(212 178 120 / 0.45)"/>
+                                    <stop offset="1" stop-color="rgb(212 178 120 / 0)"/>
+                                </linearGradient>
+                            </defs>
+                            <path class="founder-chart-area"
+                                  d="M4,168 L60,150 L112,158 L168,116 L214,128 L268,70 L316,40 L316,200 L4,200 Z"/>
+                            <path class="founder-chart-line" pathLength="1" data-founder-chart
+                                  d="M4,168 L60,150 L112,158 L168,116 L214,128 L268,70 L316,40"/>
+                        </svg>
+
+                        <div class="founder-nodes" aria-hidden="true">
+                            <span class="founder-node" style="top:16%;left:22%;--d:6s"></span>
+                            <span class="founder-node" style="top:30%;left:78%;--d:8s"></span>
+                            <span class="founder-node" style="top:64%;left:12%;--d:7s"></span>
+                            <span class="founder-node" style="top:74%;left:86%;--d:9s"></span>
+                            <span class="founder-node" style="top:50%;left:50%;--d:6.5s"></span>
+                        </div>
+
+                        <div class="founder-photo-wrap">
+                            <img class="founder-photo" src="<?= e($founderImg) ?>"
+                                 alt="<?= e($block('founder_alt', 'Founder of SUBRAMANYAM')) ?>"
+                                 width="1180" height="1580" fetchpriority="high" decoding="async">
+                            <span class="founder-rim" aria-hidden="true"></span>
+                        </div>
+
+                        <div class="founder-chip founder-chip--roi" aria-hidden="true">
+                            <span>+180%<small>organic pipeline</small></span>
+                        </div>
+                        <div class="founder-chip founder-chip--roas" aria-hidden="true">
+                            <span>3.1&times;<small>blended ROAS</small></span>
+                        </div>
+                        <div class="founder-chip founder-chip--cpl" aria-hidden="true">
+                            <span>&minus;42%<small>cost / lead</small></span>
+                        </div>
+
+                        <div class="founder-scan" aria-hidden="true"></div>
+                    </div>
+                </div>
+            <?php endif; ?>
         </div>
     </div>
 </section>
@@ -304,5 +373,10 @@ $heroPoster = $block('hero_poster');
 <?php $this->start('scripts'); ?>
 <!-- WebGL crystal, home only. Self-hosted, so script-src 'self' covers it with no
      nonce and no CSP change. -->
+<?php if ($founderImg !== ''): ?>
+<!-- Founder hero parallax/tilt, home only. Self-hosted, so 'self' covers it. -->
+<script src="<?= e(asset('/assets/js/hero-founder.js')) ?>" defer></script>
+<?php else: ?>
 <script src="<?= e(asset('/assets/js/hero-3d.js')) ?>" defer></script>
+<?php endif; ?>
 <?php $this->stop(); ?>
