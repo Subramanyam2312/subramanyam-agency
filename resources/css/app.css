@@ -229,6 +229,12 @@
            transition-colors hover:bg-raised hover:text-body;
   }
 
+  /* The arrow beside an "Edit live pages" item, opening the real page. */
+  .nav-live {
+    @apply inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted
+           transition-colors hover:bg-raised hover:text-accent;
+  }
+
   /* Active nav item gets a gold spine and warm tint — a small luxury cue that
      also makes the current section unmistakable. */
   .nav-link-active {

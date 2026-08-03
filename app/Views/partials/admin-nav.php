@@ -19,6 +19,25 @@ $groups = [
             ['label' => 'Dashboard', 'href' => '/admin', 'icon' => 'grid', 'exact' => true],
         ],
     ],
+    /*
+     * Every public page, with the screen that edits it. The site itself carries no
+     * admin interface, so this is the way in: pick the page, edit it here, and the
+     * arrow opens the live page in a new tab to check the result.
+     */
+    [
+        'label' => 'Edit live pages',
+        'items' => [
+            ['label' => 'Home',     'href' => '/admin/page-content/home',    'icon' => 'grid',   'live' => '/'],
+            ['label' => 'About',    'href' => '/admin/page-content/about',   'icon' => 'type',   'live' => '/about'],
+            ['label' => 'Services', 'href' => '/admin/services',             'icon' => 'layers', 'live' => '/services'],
+            ['label' => 'Work',     'href' => '/admin/case-studies',         'icon' => 'award',  'live' => '/work'],
+            ['label' => 'Blog',     'href' => '/admin/posts',                'icon' => 'file',   'live' => '/blog'],
+            ['label' => 'Contact',  'href' => '/admin/page-content/contact', 'icon' => 'mail',   'live' => '/contact'],
+            ['label' => 'FAQ',      'href' => '/admin/faqs',                 'icon' => 'help',   'live' => '/faq'],
+            ['label' => 'Privacy',  'href' => '/admin/page-content/privacy', 'icon' => 'shield', 'live' => '/privacy'],
+            ['label' => 'Terms',    'href' => '/admin/page-content/terms',   'icon' => 'shield', 'live' => '/terms'],
+        ],
+    ],
     [
         'label' => 'Content',
         'items' => [
@@ -113,9 +132,9 @@ $user = Auth::user();
                 <ul class="space-y-0.5">
                     <?php foreach ($group['items'] as $item): ?>
                         <?php if (($item['admin_only'] ?? false) && !Auth::isAdmin()) { continue; } ?>
-                        <li>
+                        <li class="<?= isset($item['live']) ? 'flex items-center gap-1' : '' ?>">
                             <a href="<?= e($item['href']) ?>"
-                               class="nav-link <?= $isActive($item) ? 'nav-link-active' : '' ?>"
+                               class="nav-link <?= isset($item['live']) ? 'flex-1' : '' ?> <?= $isActive($item) ? 'nav-link-active' : '' ?>"
                                <?= $isActive($item) ? 'aria-current="page"' : '' ?>>
                                 <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none"
                                      stroke="currentColor" stroke-width="1.75" stroke-linecap="round"
@@ -131,6 +150,18 @@ $user = Auth::user();
                                     </span>
                                 <?php endif; ?>
                             </a>
+
+                            <?php if (isset($item['live'])): ?>
+                                <!-- Separate link: an anchor cannot be nested inside another. -->
+                                <a href="<?= e($item['live']) ?>" target="_blank" rel="noopener"
+                                   class="nav-live" title="Open <?= e($item['label']) ?> on the site">
+                                    <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                         stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M7 17 17 7M9 7h8v8"/>
+                                    </svg>
+                                    <span class="sr-only">View <?= e($item['label']) ?> on the site</span>
+                                </a>
+                            <?php endif; ?>
                         </li>
                     <?php endforeach; ?>
                 </ul>
