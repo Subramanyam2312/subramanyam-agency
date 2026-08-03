@@ -122,6 +122,13 @@ $noindex   = (bool) ($meta['noindex'] ?? false);
         </svg>
     </button>
 
+    <!-- Staff-only shortcut to whichever CMS screen edits this page. Renders
+         nothing for guests, and a signed-in response is never cached. -->
+    <?= $this->include('partials/admin-bar', [
+        'currentPath' => $currentPath,
+        'editId'      => $case['id'] ?? $service['id'] ?? $post['id'] ?? null,
+    ]) ?>
+
     <script src="<?= e(asset('/assets/js/site.js')) ?>" defer></script>
 
     <?= $this->yieldSection('scripts') ?>

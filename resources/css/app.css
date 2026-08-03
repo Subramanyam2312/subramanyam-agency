@@ -763,6 +763,29 @@
     .founder-chip--cpl  { left: 2%; }
   }
 
+  /* Floating admin shortcut bar. Bottom-left so it never collides with the
+     back-to-top button, and only ever rendered for signed-in staff. */
+  .admin-bar {
+    @apply fixed bottom-6 left-6 z-40 flex items-center gap-1 rounded-full
+           border border-accent/35 bg-surface/85 p-1.5 backdrop-blur-xl;
+    box-shadow: 0 14px 40px -18px rgb(0 0 0 / 0.9);
+  }
+
+  .admin-bar-edit {
+    @apply inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium text-ink;
+    background: linear-gradient(135deg,
+      rgb(var(--c-gold-2)) 0%, rgb(var(--c-accent)) 60%, rgb(var(--c-gold-2)) 100%);
+  }
+
+  .admin-bar-link {
+    @apply rounded-full px-3 py-1.5 text-xs text-muted transition-colors hover:bg-raised hover:text-body;
+  }
+
+  @media (max-width: 640px) {
+    /* Keep clear of the back-to-top button on small screens. */
+    .admin-bar { @apply bottom-4 left-4 right-20 justify-center; }
+  }
+
   /* About-page portrait — same "emerge from the dark" feather as the hero, but a
      static image (no 3D scene) with a soft champagne glow behind it. */
   .about-portrait-wrap { position: relative; }
