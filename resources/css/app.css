@@ -851,10 +851,46 @@
     @apply rounded-full border border-field px-3.5 py-1.5 text-xs text-body transition-colors hover:bg-raised;
   }
 
+  /* The bar's buttons set an explicit display, which beats the browser's own
+     [hidden] rule — so hiding one has to be stated here. */
+  .cms-bar [hidden] {
+    display: none !important;
+  }
+
   .cms-bar-close {
     @apply inline-flex h-8 w-8 items-center justify-center rounded-full text-muted
            transition-colors hover:bg-raised hover:text-body;
   }
+
+  /* Inline editing, only inside a CMS preview and only after Edit is pressed. */
+  .is-inline-editing [data-edit] {
+    outline: 1px dashed rgb(var(--c-accent) / 0.55);
+    outline-offset: 4px;
+    border-radius: 2px;
+    cursor: text;
+    transition: outline-color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .is-inline-editing [data-edit]:hover {
+    outline-color: rgb(var(--c-accent) / 0.9);
+    background: rgb(var(--c-accent) / 0.06);
+  }
+
+  .is-inline-editing [data-edit]:focus {
+    outline: 2px solid rgb(var(--c-accent));
+    background: rgb(var(--c-accent) / 0.08);
+  }
+
+  /* A split heading is flattened to plain text while editing, so its per-word
+     reveal transforms must not fight the caret. */
+  .is-inline-editing [data-edit] .word,
+  .is-inline-editing [data-edit] .word > span {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Keep the page clear of the bar while editing near the bottom. */
+  .is-inline-editing { padding-bottom: 4rem; }
 
   /* About-page portrait — same "emerge from the dark" feather as the hero, but a
      static image (no 3D scene) with a soft champagne glow behind it. */

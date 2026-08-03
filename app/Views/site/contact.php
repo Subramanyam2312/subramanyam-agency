@@ -42,15 +42,16 @@ for ($i = 1; $i <= $max; $i++) {
     'eyebrow' => $block('hero_eyebrow', 'Contact'),
     'heading' => $block('hero_heading', 'Start a conversation'),
     'lede'    => $block('hero_lede'),
+    'editPage' => 'contact',
 ]) ?>
 
 <!-- ===================================================== FORM + DETAILS -->
 <section id="say-hello" class="section rule">
     <div class="container-site grid gap-14 lg:grid-cols-12">
         <div class="lg:col-span-7">
-            <p class="section-index"><?= e($block('form_label')) ?></p>
-            <h2 class="display-md reveal mt-3"><?= e($block('form_heading')) ?></h2>
-            <p class="prose-body reveal mt-4 max-w-xl text-sm"><?= e($block('form_intro')) ?></p>
+            <p class="section-index"<?= editable('contact','form_label') ?>><?= e($block('form_label')) ?></p>
+            <h2 class="display-md reveal mt-3"<?= editable('contact','form_heading') ?>><?= e($block('form_heading')) ?></h2>
+            <p class="prose-body reveal mt-4 max-w-xl text-sm"<?= editable('contact','form_intro') ?>><?= e($block('form_intro')) ?></p>
 
             <?= $this->include('partials/site-flash') ?>
 
@@ -104,8 +105,8 @@ for ($i = 1; $i <= $max; $i++) {
         </div>
 
         <aside class="lg:col-span-4 lg:col-start-9">
-            <p class="section-index"><?= e($block('details_label')) ?></p>
-            <p class="prose-body reveal mt-3 text-sm"><?= e($block('details_intro')) ?></p>
+            <p class="section-index"<?= editable('contact','details_label') ?>><?= e($block('details_label')) ?></p>
+            <p class="prose-body reveal mt-3 text-sm"<?= editable('contact','details_intro') ?>><?= e($block('details_intro')) ?></p>
 
             <div class="mt-7 space-y-7">
                 <?php if ($email): ?>
@@ -159,9 +160,9 @@ for ($i = 1; $i <= $max; $i++) {
 <?php if ($steps !== []): ?>
     <section class="section rule" aria-labelledby="next-heading">
         <div class="container-site">
-            <p class="section-index"><?= e($block('next_label')) ?></p>
-            <h2 id="next-heading" class="display-lg reveal mt-3" data-split><?= e($block('next_heading')) ?></h2>
-            <p class="lede mt-6"><?= e($block('next_lede')) ?></p>
+            <p class="section-index"<?= editable('contact','next_label') ?>><?= e($block('next_label')) ?></p>
+            <h2 id="next-heading" class="display-lg reveal mt-3" data-split<?= editable('contact','next_heading') ?>><?= e($block('next_heading')) ?></h2>
+            <p class="lede mt-6"<?= editable('contact','next_lede') ?>><?= e($block('next_lede')) ?></p>
 
             <ol class="mt-12 divide-y divide-line/60 border-y border-line/60">
                 <?php foreach ($steps as $i => $step): ?>
@@ -183,8 +184,8 @@ for ($i = 1; $i <= $max; $i++) {
     <section class="section rule" aria-labelledby="contact-faq-heading">
         <div class="container-site grid gap-12 lg:grid-cols-12">
             <div class="lg:col-span-4">
-                <p class="section-index"><?= e($block('faq_label')) ?></p>
-                <h2 id="contact-faq-heading" class="display-lg reveal mt-3" data-split><?= e($block('faq_heading')) ?></h2>
+                <p class="section-index"<?= editable('contact','faq_label') ?>><?= e($block('faq_label')) ?></p>
+                <h2 id="contact-faq-heading" class="display-lg reveal mt-3" data-split<?= editable('contact','faq_heading') ?>><?= e($block('faq_heading')) ?></h2>
             </div>
             <div class="lg:col-span-7 lg:col-start-6">
                 <?= $this->include('partials/accordion', ['items' => $faqs, 'level' => 3]) ?>
@@ -197,9 +198,9 @@ for ($i = 1; $i <= $max; $i++) {
 <?php if ($block('cta_heading') !== ''): ?>
     <section class="section rule">
         <div class="container-site text-center">
-            <p class="eyebrow"><?= e($block('cta_eyebrow')) ?></p>
-            <h2 class="display-lg gilt reveal mx-auto mt-4 max-w-[24ch]"><?= e($block('cta_heading')) ?></h2>
-            <p class="lede mx-auto mt-6"><?= e($block('cta_lede')) ?></p>
+            <p class="eyebrow"<?= editable('contact','cta_eyebrow') ?>><?= e($block('cta_eyebrow')) ?></p>
+            <h2 class="display-lg gilt reveal mx-auto mt-4 max-w-[24ch]"<?= editable('contact','cta_heading') ?>><?= e($block('cta_heading')) ?></h2>
+            <p class="lede mx-auto mt-6"<?= editable('contact','cta_lede') ?>><?= e($block('cta_lede')) ?></p>
             <div class="mt-9 flex flex-wrap justify-center gap-3">
                 <?php if ($label = $block('cta_primary')): ?>
                     <a href="#say-hello" class="btn-bone"><?= e($label) ?></a>

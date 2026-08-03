@@ -23,6 +23,9 @@ $drafts  = PageBlock::draftCount();
 $preview = PageBlock::previewing() && $drafts > 0;
 $editId = isset($editId) && $editId !== null ? (int) $editId : null;
 
+/* Only the block-driven pages carry inline-editable copy. */
+$editable = in_array($currentPath ?? '/', ['/', '/about', '/contact', '/privacy', '/terms'], true);
+
 /** Pages whose whole content is one CMS screen. */
 $exact = [
     '/'         => ['/admin/page-content/home',    'Edit this page'],
@@ -51,14 +54,15 @@ if (isset($exact[$path])) {
     [$target, $label] = ['/admin', 'Open the CMS'];
 }
 ?>
-<div class="cms-bar" role="complementary" aria-label="Content review">
+<div class="cms-bar" role="complementary" aria-label="Content review"
+     data-cms-bar data-csrf="<?= e(csrf_token()) ?>">
     <p class="cms-bar-note">
         <svg class="h-3.5 w-3.5 shrink-0 text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>
         </svg>
         <span class="font-medium text-body">SUBRAMANYAM CMS</span>
-        <span class="hidden sm:inline">
+        <span class="hidden sm:inline" data-cms-status>
             <?php if ($preview): ?>
                 Showing your unpublished draft — visitors still see the published version.
             <?php else: ?>
@@ -76,8 +80,15 @@ if (isset($exact[$path])) {
             </form>
         <?php endif; ?>
 
-        <a href="<?= e($target) ?>" class="<?= $preview ? 'cms-bar-link' : 'cms-bar-primary' ?>"><?= e($label) ?></a>
-        <a href="/admin" class="cms-bar-link">Full CMS&nbsp;&#8599;</a>
+        <?php if ($editable): ?>
+            <!-- Falls back to the CMS screen when JavaScript is unavailable; the
+                 editor upgrades it to an in-page toggle. -->
+            <a href="<?= e($target) ?>" class="cms-bar-primary" data-cms-edit>Edit this page</a>
+        <?php else: ?>
+            <a href="<?= e($target) ?>" class="<?= $preview ? 'cms-bar-link' : 'cms-bar-primary' ?>"><?= e($label) ?></a>
+        <?php endif; ?>
+
+        <a href="<?= e($target) ?>" class="cms-bar-link">Full CMS&nbsp;&#8599;</a>
         <a href="<?= e($path) ?>" class="cms-bar-close" title="Hide this bar" aria-label="Hide this bar">
             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"
                  stroke-linecap="round" aria-hidden="true">
@@ -86,3 +97,8 @@ if (isset($exact[$path])) {
         </a>
     </div>
 </div>
+
+<?php if ($editable): ?>
+    <!-- Preview-only, so it is never sent to a visitor. Self-hosted: 'self' covers it. -->
+    <script src="<?= e(asset('/assets/js/inline-edit.js')) ?>" defer></script>
+<?php endif; ?>

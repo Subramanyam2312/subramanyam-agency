@@ -178,3 +178,31 @@ if (!function_exists('json_column')) {
         return is_array($decoded) ? $decoded : [];
     }
 }
+
+if (!function_exists('editable')) {
+    /**
+     * Marks an element as inline-editable, but only inside a CMS preview.
+     *
+     * PageBlock::previewing() is true exactly when the page was opened from the
+     * portal by a signed-in user, which is the same gate the review bar uses. A
+     * normal visit — signed in or not — prints nothing, so the public HTML is
+     * untouched and no editing surface exists outside the preview.
+     *
+     * The value still has to survive the server's own rules: the save endpoint
+     * reads each block's declared type from the database rather than trusting
+     * anything the page sends, and writes a draft, never the live copy.
+     */
+    function editable(string $page, string $block, string $type = 'text'): string
+    {
+        if (!App\Models\PageBlock::previewing()) {
+            return '';
+        }
+
+        return sprintf(
+            ' data-edit="%s" data-edit-block="%s" data-edit-type="%s"',
+            e($page),
+            e($block),
+            $type === 'html' ? 'html' : 'text'
+        );
+    }
+}

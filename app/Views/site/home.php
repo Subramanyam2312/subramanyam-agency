@@ -49,13 +49,13 @@ $founderImg  = is_file($founderFile) ? $founderPath . '?v=' . filemtime($founder
     <div class="container-site">
         <div class="grid items-center gap-10 <?= $founderImg !== '' ? 'lg:grid-cols-[1.05fr_0.92fr] lg:gap-14' : '' ?>">
             <div class="relative z-10">
-                <p class="eyebrow"><?= e($block('hero_eyebrow', 'Performance marketing studio')) ?></p>
+                <p class="eyebrow"<?= editable('home','hero_eyebrow') ?>><?= e($block('hero_eyebrow', 'Performance marketing studio')) ?></p>
 
-                <h1 class="display-xl gilt gilt-animate mt-6 max-w-[16ch]">
+                <h1 class="display-xl gilt gilt-animate mt-6 max-w-[16ch]"<?= editable('home','hero_headline') ?>>
                     <?= e($block('hero_headline', 'Marketing that earns its line on the P&L')) ?>
                 </h1>
 
-                <p class="lede mt-8">
+                <p class="lede mt-8"<?= editable('home','hero_subheadline') ?>>
                     <?= e($block('hero_subheadline')) ?>
                 </p>
 
@@ -158,7 +158,7 @@ $founderImg  = is_file($founderFile) ? $founderPath . '?v=' . filemtime($founder
         <div class="flex flex-wrap items-end justify-between gap-6">
             <div>
                 <p class="section-index">01</p>
-                <h2 id="services-heading" class="display-lg reveal mt-3">
+                <h2 id="services-heading" class="display-lg reveal mt-3"<?= editable('home','services_heading') ?>>
                     <?= e($block('services_heading', 'What we do')) ?>
                 </h2>
             </div>
@@ -189,10 +189,10 @@ $founderImg  = is_file($founderFile) ? $founderPath . '?v=' . filemtime($founder
 <section class="section rule" aria-labelledby="process-heading">
     <div class="container-site">
         <p class="section-index">02</p>
-        <h2 id="process-heading" class="display-lg reveal mt-3">
+        <h2 id="process-heading" class="display-lg reveal mt-3"<?= editable('home','process_heading') ?>>
             <?= e($block('process_heading', 'How we work')) ?>
         </h2>
-        <p class="lede reveal mt-6"><?= e($block('process_intro')) ?></p>
+        <p class="lede reveal mt-6"<?= editable('home','process_intro') ?>><?= e($block('process_intro')) ?></p>
 
         <ol class="mt-16 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
             <?php for ($step = 1; $step <= 4; $step++): ?>
@@ -327,7 +327,7 @@ $founderImg  = is_file($founderFile) ? $founderPath . '?v=' . filemtime($founder
             <div class="flex flex-wrap items-end justify-between gap-6">
                 <div>
                     <p class="section-index">05</p>
-                    <h2 id="blog-heading" class="display-lg reveal mt-3">
+                    <h2 id="blog-heading" class="display-lg reveal mt-3"<?= editable('home','blog_heading') ?>>
                         <?= e($block('blog_heading', 'From the blog')) ?>
                     </h2>
                 </div>

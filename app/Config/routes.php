@@ -134,6 +134,9 @@ return function (Router $router): void {
             $router->get('/page-content/{page:[a-z0-9-]+}', [PageBlockController::class, 'edit']);
             $router->patch('/page-content/{page:[a-z0-9-]+}', [PageBlockController::class, 'update']);
 
+            // Edits typed on a previewed page. Stores drafts, same as the form.
+            $router->post('/inline-edit', [\App\Controllers\Admin\InlineEditController::class, 'save']);
+
             // Draft workflow for page copy: saving stores a draft, these two make
             // it live or throw it away.
             $router->post('/page-content/publish', [PageBlockController::class, 'publish']);
