@@ -78,6 +78,8 @@ $noindex   = (bool) ($meta['noindex'] ?? false);
 
     <?= $this->include('partials/site-schema') ?>
     <?= $this->yieldSection('head') ?>
+    <?= $this->include('partials/fonts') ?>
+
     <?= $this->include('partials/analytics') ?>
 </head>
 <body class="site min-h-screen bg-ink text-body antialiased">

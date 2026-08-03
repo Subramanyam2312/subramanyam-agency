@@ -175,6 +175,10 @@ return function (Router $router): void {
                 $router->post('/plugins/purge-cache', [\App\Controllers\Admin\PluginController::class, 'purgeCache']);
                 $router->post('/plugins/verify-akismet', [\App\Controllers\Admin\PluginController::class, 'verifyAkismet']);
 
+                // Settings -> Appearance (typography).
+                $router->get('/appearance', [\App\Controllers\Admin\AppearanceController::class, 'index']);
+                $router->patch('/appearance', [\App\Controllers\Admin\AppearanceController::class, 'update']);
+
                 // Tools -> Traffic (Traffic Manager dashboard).
                 $router->get('/traffic', [\App\Controllers\Admin\TrafficController::class, 'index']);
 

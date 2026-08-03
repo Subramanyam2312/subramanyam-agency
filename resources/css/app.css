@@ -34,6 +34,56 @@
 }
 
 /*
+ * Alternative pairings, offered under Settings -> Appearance. All self-hosted,
+ * so switching pairing never adds an external request and the strict
+ * font-src 'self' policy stays intact.
+ *
+ * Declaring a face costs nothing until something actually uses it — a browser
+ * only downloads a font once a rule matches real text — so all eleven can sit
+ * here while only the chosen two are ever fetched.
+ */
+@font-face {
+  font-family: 'Fraunces';
+  src: url('/assets/fonts/Fraunces.woff2') format('woff2-variations');
+  font-weight: 400 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Playfair Display';
+  src: url('/assets/fonts/PlayfairDisplay.woff2') format('woff2-variations');
+  font-weight: 400 700; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Cormorant Garamond';
+  src: url('/assets/fonts/CormorantGaramond.woff2') format('woff2-variations');
+  font-weight: 400 600; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'DM Serif Display';
+  src: url('/assets/fonts/DMSerifDisplay.woff2') format('woff2');
+  font-weight: 400; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Inter';
+  src: url('/assets/fonts/Inter.woff2') format('woff2-variations');
+  font-weight: 400 600; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Jost';
+  src: url('/assets/fonts/Jost.woff2') format('woff2-variations');
+  font-weight: 400 600; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/assets/fonts/Montserrat.woff2') format('woff2-variations');
+  font-weight: 400 600; font-style: normal; font-display: swap;
+}
+@font-face {
+  font-family: 'DM Sans';
+  src: url('/assets/fonts/DMSans.woff2') format('woff2-variations');
+  font-weight: 400 600; font-style: normal; font-display: swap;
+}
+
+/*
  * Design tokens.
  *
  * Every colour in the build resolves through these. The brand direction picked in
@@ -58,6 +108,10 @@
     --c-positive: 90 194 150;
     --c-warning:  226 176 84;
     --c-danger:   236 118 110;
+
+    /* Typography. The chosen pairing is applied by partials/fonts.php. */
+    --font-display: 'Instrument Serif', ui-serif, Georgia, serif;
+    --font-body:    'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
   }
 
   html {
@@ -221,7 +275,10 @@
     --c-accent:  212 178 120; /* champagne gold */
     --c-gold-2:  236 214 176; /* light champagne highlight */
 
-    font-family: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Instrument Serif', ui-serif, Georgia, serif;
+    --font-body:    'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+
+    font-family: var(--font-body);
   }
 
   /* Gilded gradient text — an ivory-to-champagne sheen for headline moments. Both
@@ -250,7 +307,7 @@
   /* Type ------------------------------------------------------------------ */
 
   .display {
-    font-family: 'Instrument Serif', ui-serif, Georgia, serif;
+    font-family: var(--font-display);
     font-weight: 400;
     line-height: 0.95;
     letter-spacing: -0.02em;
@@ -324,7 +381,7 @@
 
   .prose-editorial blockquote {
     @apply border-l border-line pl-6 text-body;
-    font-family: 'Instrument Serif', ui-serif, Georgia, serif;
+    font-family: var(--font-display);
     font-size: 1.5rem;
     line-height: 1.35;
   }

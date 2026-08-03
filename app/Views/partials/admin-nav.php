@@ -46,6 +46,7 @@ $groups = [
         'items' => [
             ['label' => 'Plugins',    'href' => '/admin/plugins',    'icon' => 'plug',   'admin_only' => true],
             ['label' => 'Traffic',    'href' => '/admin/traffic',    'icon' => 'chart',  'admin_only' => true],
+            ['label' => 'Appearance', 'href' => '/admin/appearance', 'icon' => 'type',   'admin_only' => true],
             ['label' => 'Settings',   'href' => '/admin/settings',   'icon' => 'cog',    'admin_only' => true],
             ['label' => 'Users',      'href' => '/admin/users',      'icon' => 'users',  'admin_only' => true],
             ['label' => 'API tokens', 'href' => '/admin/api-tokens', 'icon' => 'key',    'admin_only' => true],

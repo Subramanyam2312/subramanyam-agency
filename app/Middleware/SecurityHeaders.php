@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Middleware;
 
+use App\Core\Fonts;
 use App\Core\Nonce;
 use App\Core\Request;
 use App\Core\Response;
@@ -88,6 +89,19 @@ final class SecurityHeaders implements Middleware
             $directives['script-src']  .= ' https://connect.facebook.net';
             $directives['img-src']     .= ' https://www.facebook.com https://connect.facebook.net';
             $directives['connect-src'] .= ' https://www.facebook.com';
+        }
+
+        /*
+         * Google Fonts, only while the Appearance setting is switched to it. The
+         * curated pairings are self-hosted, so the default install never reaches
+         * fonts.googleapis.com and font-src stays 'self'.
+         *
+         * The stylesheet Google serves is a real stylesheet rather than a nonce'd
+         * inline block, so style-src has to name the host explicitly.
+         */
+        if (Fonts::usesGoogle()) {
+            $directives['style-src'] .= ' https://fonts.googleapis.com';
+            $directives['font-src']  .= ' https://fonts.gstatic.com';
         }
 
         $parts = [];
