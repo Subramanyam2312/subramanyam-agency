@@ -115,12 +115,17 @@ final class PageController extends Controller
 
     public function about(Request $request): Response
     {
+        $ogImage = is_file(PUBLIC_PATH . '/uploads/founder/founder.jpg')
+            ? rtrim((string) config('app.url'), '/') . '/uploads/founder/founder.jpg'
+            : null;
+
         return $this->view('site/about', [
             // Timeline section removed from the About page; no longer queried here.
             'logos'    => ClientLogo::withMedia(true),
             'meta'     => [
-                'title'       => 'About',
-                'description' => PageBlock::value('about', 'story_heading', 'About the studio'),
+                'title'       => 'About Subramanyam M N — Digital Marketing Strategist in Chennai',
+                'description' => "I'm Subramanyam M N, a digital marketing strategist and content creator in Chennai. I build brand strategy, ad creative, SEO and AI-assisted video for brands across South India.",
+                'og_image'    => $ogImage,
             ],
         ]);
     }

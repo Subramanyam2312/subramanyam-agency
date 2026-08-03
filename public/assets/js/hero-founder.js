@@ -46,9 +46,9 @@
     var prog = 1 - (rect.top + rect.height * 0.5) / vh;
     if (prog < 0) { prog = 0; } else if (prog > 1) { prog = 1; }
 
-    // Vertical parallax + a slight backward lean as you scroll down.
-    stage.style.setProperty('--fr-py', (prog * -26).toFixed(2));
-    var lean = prog * 3.5;
+    // Vertical parallax + a backward lean as you scroll down.
+    stage.style.setProperty('--fr-py', (prog * -48).toFixed(2));
+    var lean = prog * 6.5;
 
     // Ease the pointer tilt so it glides rather than snaps.
     tiltX += (targetX - tiltX) * 0.12;
@@ -71,8 +71,8 @@
       var rect = scene.getBoundingClientRect();
       var nx = (e.clientX - (rect.left + rect.width / 2)) / (rect.width / 2);
       var ny = (e.clientY - (rect.top + rect.height / 2)) / (rect.height / 2);
-      targetY = Math.max(-1, Math.min(1, nx)) * 6;    // rotateY follows cursor X
-      targetX = Math.max(-1, Math.min(1, ny)) * -5;   // rotateX follows cursor Y
+      targetY = Math.max(-1, Math.min(1, nx)) * 10;   // rotateY follows cursor X
+      targetX = Math.max(-1, Math.min(1, ny)) * -8;   // rotateX follows cursor Y
       schedule();
     });
     scene.addEventListener('pointerleave', function () {

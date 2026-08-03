@@ -763,6 +763,27 @@
     .founder-chip--cpl  { left: 2%; }
   }
 
+  /* About-page portrait — same "emerge from the dark" feather as the hero, but a
+     static image (no 3D scene) with a soft champagne glow behind it. */
+  .about-portrait-wrap { position: relative; }
+  .about-portrait-wrap::before {
+    content: "";
+    position: absolute; inset: -8%;
+    background: radial-gradient(58% 50% at 60% 28%, rgb(var(--c-accent) / 0.16), transparent 66%);
+    z-index: -1;
+  }
+  .about-portrait {
+    width: 100%; height: auto;
+    -webkit-mask-image:
+      radial-gradient(80% 94% at 50% 40%, #000 60%, transparent 90%),
+      linear-gradient(to bottom, transparent 0, #000 8%, #000 92%, transparent 100%);
+    -webkit-mask-composite: source-in;
+    mask-image:
+      radial-gradient(80% 94% at 50% 40%, #000 60%, transparent 90%),
+      linear-gradient(to bottom, transparent 0, #000 8%, #000 92%, transparent 100%);
+    mask-composite: intersect;
+  }
+
   /* Analytics scan beam. */
   .founder-scan {
     position: absolute; left: 3%; right: 3%; top: 0; height: 2px;
