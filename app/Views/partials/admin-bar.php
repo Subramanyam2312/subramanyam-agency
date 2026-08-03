@@ -1,6 +1,7 @@
 <?php
 
 use App\Core\Auth;
+use App\Models\PageBlock;
 
 /**
  * Review bar, shown when a page is opened from the CMS's "view live page" arrow.
@@ -17,7 +18,9 @@ if (empty($fromCms) || !Auth::check()) {
     return;
 }
 
-$path   = $currentPath ?? '/';
+$path    = $currentPath ?? '/';
+$drafts  = PageBlock::draftCount();
+$preview = PageBlock::previewing() && $drafts > 0;
 $editId = isset($editId) && $editId !== null ? (int) $editId : null;
 
 /** Pages whose whole content is one CMS screen. */
@@ -56,12 +59,24 @@ if (isset($exact[$path])) {
         </svg>
         <span class="font-medium text-body">SUBRAMANYAM CMS</span>
         <span class="hidden sm:inline">
-            You are signed in — this is the live page, exactly as visitors see it.
+            <?php if ($preview): ?>
+                Showing your unpublished draft — visitors still see the published version.
+            <?php else: ?>
+                You are signed in — this is the live page, exactly as visitors see it.
+            <?php endif; ?>
         </span>
     </p>
 
     <div class="cms-bar-actions">
-        <a href="<?= e($target) ?>" class="cms-bar-primary"><?= e($label) ?></a>
+        <?php if ($preview): ?>
+            <form method="post" action="/admin/page-content/publish">
+                <?= csrf_field() ?>
+                <input type="hidden" name="return_to" value="/admin/page-content">
+                <button type="submit" class="cms-bar-primary">Publish &rarr; live</button>
+            </form>
+        <?php endif; ?>
+
+        <a href="<?= e($target) ?>" class="<?= $preview ? 'cms-bar-link' : 'cms-bar-primary' ?>"><?= e($label) ?></a>
         <a href="/admin" class="cms-bar-link">Full CMS&nbsp;&#8599;</a>
         <a href="<?= e($path) ?>" class="cms-bar-close" title="Hide this bar" aria-label="Hide this bar">
             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"

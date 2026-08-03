@@ -9,9 +9,11 @@ use App\Core\ActivityLogger;
 use App\Core\Auth;
 use App\Core\Database;
 use App\Core\HttpException;
+use App\Core\PageCache;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Sanitizer;
+use App\Core\Sitemap;
 use App\Models\Media;
 use App\Models\PageBlock;
 
@@ -102,10 +104,16 @@ final class PageBlockController extends Controller
                 $mediaId = (int) $mediaIds[$key];
             }
 
+            /*
+             * Saving stores a draft. The live site keeps showing `value` until
+             * Publish is pressed, so typing here never changes the public page.
+             * A draft identical to what is published is stored as NULL, which
+             * keeps "unpublished changes" honest when an edit is undone.
+             */
             PageBlock::updateById((int) $block['id'], [
-                'value'      => $value,
-                'media_id'   => $mediaId,
-                'updated_by' => $userId,
+                'draft_value' => $value === (string) ($block['value'] ?? '') ? null : $value,
+                'media_id'    => $mediaId,
+                'updated_by'  => $userId,
             ]);
 
             $updated++;
@@ -118,9 +126,64 @@ final class PageBlockController extends Controller
             'blocks' => $updated,
         ]);
 
-        $this->success('Page copy saved.');
+        $pending = PageBlock::draftCount();
+
+        $this->success($pending > 0
+            ? 'Saved as a draft. Press Publish when you want visitors to see it.'
+            : 'Page copy saved — it matches what is already published.');
 
         return $this->redirect('/admin/page-content/' . $pageKey);
+    }
+
+    /** Makes every pending draft the live copy. */
+    public function publish(Request $request): Response
+    {
+        $published = PageBlock::publishDrafts();
+
+        if ($published === 0) {
+            $this->error('There is nothing waiting to be published.');
+
+            return $this->redirect($this->backTo($request));
+        }
+
+        // The published copy is baked into cached pages and the sitemap.
+        PageCache::purge();
+        Sitemap::generate();
+
+        ActivityLogger::log('page_blocks.published', 'page_blocks', null, ['blocks' => $published]);
+        $this->success($published === 1
+            ? 'Published. The change is live.'
+            : 'Published ' . $published . ' changes. They are live now.');
+
+        return $this->redirect($this->backTo($request));
+    }
+
+    /** Throws pending drafts away; the live copy is untouched. */
+    public function discard(Request $request): Response
+    {
+        $discarded = PageBlock::discardDrafts();
+
+        if ($discarded === 0) {
+            $this->error('There were no unpublished changes to discard.');
+
+            return $this->redirect($this->backTo($request));
+        }
+
+        ActivityLogger::log('page_blocks.discarded', 'page_blocks', null, ['blocks' => $discarded]);
+        $this->success('Discarded ' . $discarded . ' unpublished change' . ($discarded === 1 ? '' : 's') . '.');
+
+        return $this->redirect($this->backTo($request));
+    }
+
+    /**
+     * Publishing is reachable from several screens, so it returns to the one it
+     * was pressed on rather than always landing on the page list.
+     */
+    private function backTo(Request $request): string
+    {
+        $to = (string) $request->input('return_to', '');
+
+        return preg_match('#^/admin[a-z0-9/\-]*$#i', $to) === 1 ? $to : '/admin/page-content';
     }
 
     /**

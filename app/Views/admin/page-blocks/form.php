@@ -58,7 +58,10 @@ foreach ($repeatables as $groupId => $spec) {
                     };
                     ?>
                     <?php if ($fieldType === 'media'): ?>
-                        <?= $this->include('partials/field', [
+                        <?php if ($block['has_draft'] ?? false): ?>
+                        <p class="mb-1 text-xs text-warning">Unpublished edit</p>
+                    <?php endif; ?>
+                    <?= $this->include('partials/field', [
                             'name'  => 'block_media[' . $key . ']',
                             'label' => $block['label'],
                             'type'  => 'media',

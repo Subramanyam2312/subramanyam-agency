@@ -69,7 +69,17 @@ View::share('currentPath', $request->path());
  * came from — the bar itself still checks for a signed-in session, so adding the
  * parameter by hand shows a visitor nothing.
  */
-View::share('fromCms', $request->query('from') === 'cms');
+$fromCms = $request->query('from') === 'cms';
+View::share('fromCms', $fromCms);
+
+/*
+ * A staff preview renders pending drafts. Both conditions matter: the hint says
+ * the click came from the portal, and the session says who is asking. The auth
+ * lookup only runs when the hint is present, so a normal visit is unaffected.
+ */
+if ($fromCms && App\Core\Auth::check()) {
+    App\Models\PageBlock::previewDrafts();
+}
 
 $router = new Router();
 // Firewall runs first: a rejected request never reaches CSRF, auth or a controller.

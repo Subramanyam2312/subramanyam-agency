@@ -134,6 +134,11 @@ return function (Router $router): void {
             $router->get('/page-content/{page:[a-z0-9-]+}', [PageBlockController::class, 'edit']);
             $router->patch('/page-content/{page:[a-z0-9-]+}', [PageBlockController::class, 'update']);
 
+            // Draft workflow for page copy: saving stores a draft, these two make
+            // it live or throw it away.
+            $router->post('/page-content/publish', [PageBlockController::class, 'publish']);
+            $router->post('/page-content/discard', [PageBlockController::class, 'discard']);
+
             // Repeatable card groups: add or remove a card (approach steps,
             // client cards, credentials, FAQ entries).
             $router->post('/page-content/{page:[a-z0-9-]+}/items/{group:[a-z_]+}', [PageBlockController::class, 'addItem']);

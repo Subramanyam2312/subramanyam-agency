@@ -100,6 +100,10 @@ $icons = [
 // Unread enquiry count, shown as a badge so it is visible without opening the inbox.
 $unreadCount = \App\Models\ContactSubmission::unreadCount();
 
+// Pending page-copy edits, so the publish state is visible from every screen.
+$draftCount = \App\Models\PageBlock::draftCount();
+$draftPages = $draftCount > 0 ? \App\Models\PageBlock::draftPages() : [];
+
 $currentPath = $currentPath ?? '/admin';
 
 $isActive = static function (array $item) use ($currentPath): bool {
@@ -169,7 +173,39 @@ $user = Auth::user();
         <?php endforeach; ?>
     </div>
 
+    <!-- Publish state. Saving stores a draft, so this is where it goes live. -->
     <div class="border-t border-line/70 p-3">
+        <?php if ($draftCount > 0): ?>
+            <div class="rounded-card border border-warning/40 bg-warning/10 p-3">
+                <p class="flex items-center gap-2 text-xs font-medium text-warning">
+                    <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-warning"></span>
+                    Unpublished changes
+                </p>
+                <p class="mt-1 text-xs text-muted">
+                    <?= e((string) $draftCount) ?> edit<?= $draftCount === 1 ? '' : 's' ?> on
+                    <?= e(implode(', ', $draftPages)) ?> — visitors still see the published version.
+                </p>
+
+                <form method="post" action="/admin/page-content/publish" class="mt-3">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="return_to" value="<?= e($currentPath) ?>">
+                    <button type="submit" class="btn-primary w-full py-1.5 text-xs">Publish &rarr; live</button>
+                </form>
+
+                <form method="post" action="/admin/page-content/discard" class="mt-2"
+                      data-confirm="Discard every unpublished change? The published pages are untouched.">
+                    <?= csrf_field() ?>
+                    <input type="hidden" name="return_to" value="<?= e($currentPath) ?>">
+                    <button type="submit" class="w-full text-xs text-muted hover:text-danger">Discard</button>
+                </form>
+            </div>
+        <?php else: ?>
+            <p class="flex items-center gap-2 px-3 py-1 text-xs text-muted">
+                <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-positive"></span>
+                Everything is published
+            </p>
+        <?php endif; ?>
+
         <?php if ($user !== null): ?>
             <div class="px-3 py-2">
                 <p class="truncate text-sm font-medium"><?= e($user['name']) ?></p>
