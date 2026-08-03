@@ -135,12 +135,46 @@ public_html/uploads/  775
 
 `storage/` and `uploads/` must be writable by PHP. Everything else must not be.
 
+### Don't forget the images
+
+`public/uploads/` is **git-ignored**, so if you deploy from a git clone rather than
+a zip of your working folder, these files will be missing and the site will render
+with broken images:
+
+| Upload to | What it is |
+|---|---|
+| `public_html/uploads/founder/founder.jpg` | the founder portrait — the **home hero and About page both break without it** |
+| `public_html/uploads/work/*.jpg` | the four case-study covers |
+| `public_html/uploads/…` | anything else you have added through Media |
+
+Copy the whole local `public/uploads/` directory across and you are covered.
+`public_html/uploads/.htaccess` **must** come with it — that file is what stops an
+uploaded file from ever being executed.
+
 ---
 
 ## 4. Create `.env`
 
-In `~/domains/subramanyammn.in/` (**not** in `public_html`), create `.env` from
-`.env.example`.
+**Shortcut: the repo already ships `.env.production`,** pre-filled for this domain
+with a freshly generated `APP_KEY` and Hostinger's SMTP settings. It is git-ignored,
+so upload it alongside the project and simply **rename it to `.env`**.
+
+It must sit in `~/domains/subramanyammn.in/` — **not** in `public_html`.
+
+Then fill the four values marked `<<< FILL IN >>>`:
+
+| Value | Where it comes from |
+|---|---|
+| `DB_DATABASE` | step 1 |
+| `DB_USERNAME` | step 1 |
+| `DB_PASSWORD` | step 1 |
+| `MAIL_PASSWORD` | step 7 — the `noreply@` mailbox password |
+
+Nothing else needs changing. Skip the rest of this section unless you would
+rather build the file by hand.
+
+<details>
+<summary>Building <code>.env</code> from scratch instead</summary>
 
 Generate the key first. On SSH:
 
@@ -181,14 +215,49 @@ SECURITY_HSTS=false
 SECURITY_HSTS_MAX_AGE=300
 ```
 
+</details>
+
 **`APP_DEBUG` must be `false`.** With it on, a stack trace on any error hands a
 visitor your absolute filesystem paths and database name.
 
 Leave `SECURITY_HSTS=false` for now. Step 6 turns it on.
 
+> **SMTP port:** `.env.production` uses **465 with `MAIL_ENCRYPTION=ssl`**, which is
+> the more reliable of the two on Hostinger. Port 587 with `tls` also works — if one
+> silently fails to connect, try the other before assuming the password is wrong.
+
 ---
 
-## 5. Create the schema
+## 5. Create the schema and move your content
+
+> **Read this first.** Your real content — the home and about copy, all six
+> services, the four case studies, contact details and social links — lives in your
+> **local database**, not in the code. Running the migrations alone gives you an
+> empty site. Export the local database and import it, and everything comes with it,
+> including your admin account.
+
+### Recommended: move the whole local database
+
+Export locally (this is the database this project has been built against):
+
+```bash
+~/.agency-db/mysql/bin/mysqldump -h127.0.0.1 -P3399 -uagency -pagency_dev \
+  --default-character-set=utf8mb4 --single-transaction --no-tablespaces \
+  agency > agency-content.sql
+```
+
+That produces roughly a 90 KB file containing all 28 tables. `--no-tablespaces`
+is not optional cosmetics — without it MySQL 8 prints a `PROCESS privilege` error
+that looks like a failure but is not.
+
+Then hPanel → **Databases → phpMyAdmin** → select your database → **Import** →
+upload `agency-content.sql`. Done: schema, content and your existing admin login
+all arrive together, and you can skip the admin-creation step below.
+
+> If phpMyAdmin rejects the file for size, gzip it (`gzip agency-content.sql`) —
+> phpMyAdmin accepts `.sql.gz` directly.
+
+### Alternative: empty site from migrations
 
 **With SSH:**
 
@@ -205,6 +274,9 @@ php scripts/create-admin.php
    (`0001_…` first). Order matters — the foreign keys depend on it.
 3. Import `database/seed.sql` for the placeholder content, or skip it to start empty.
 4. Create your admin account with the temporary web route in the next section.
+
+This route gives you the original placeholder copy, not your real content — you
+would then have to retype every page in the CMS. Prefer the database export.
 
 ### Creating the first admin without SSH
 
@@ -284,8 +356,21 @@ records to your DNS yourself — follow their setup guide exactly.
 
 ### Test it
 
-Trigger a real password reset from `/admin/forgot-password` and confirm the email
-arrives. If it does not, check `storage/logs/php-error.log` — `Mailer` logs the
+The project ships a script that sends one real email through the same code path
+the contact form uses:
+
+```bash
+php scripts/mail-test.php
+```
+
+It prints the driver, host, port and recipient, then sends to `MAIL_TO_ADDRESS`
+(or pass an address: `php scripts/mail-test.php you@example.com`). On failure it
+prints the SMTP error and the two fixes that resolve most Hostinger cases.
+
+No SSH? Use the one-off Cron Jobs trick from step 5 to run it, or simply submit
+the live contact form and watch for the notification.
+
+If mail silently vanishes, check `storage/logs/php-error.log` — `Mailer` logs the
 SMTP failure there and deliberately does not surface it to the visitor.
 
 ---
@@ -325,11 +410,17 @@ Work through this in order.
 - [ ] **`https://subramanyammn.in/.env` returns 403 or 404 — never file contents**
 - [ ] `https://subramanyammn.in/app/` returns 403 or 404
 - [ ] `https://subramanyammn.in/storage/logs/` returns 403 or 404
-- [ ] Sign in at `/admin`, then **change the password you set in step 5**
-- [ ] Settings → General: site name, tagline, contact details, social links
-- [ ] Page copy: check the home and about text reads the way you want
+- [ ] Sign in at `/admin` (your existing password if you imported the database;
+      otherwise the one from step 5 — **change it either way**)
+- [ ] **The home hero shows the founder photo, not a gap** — if it does not,
+      `uploads/founder/founder.jpg` did not make it across (step 3)
+- [ ] `/work` shows four case studies, each with its cover image
+- [ ] `/about`, `/services` and `/contact` all show your real copy, not placeholders
+- [ ] Footer shows the phone, WhatsApp, email and social links
+- [ ] Settings → General and Contact: confirm everything carried over
 - [ ] Upload a real image in Media and confirm WebP variants generate
-- [ ] Submit the contact form and confirm the email arrives
+- [ ] `php scripts/mail-test.php` sends and arrives, then submit the live contact
+      form and confirm that notification arrives too
 - [ ] `/sitemap.xml` and `/robots.txt` both load
 - [ ] `/feed.xml` loads and validates
 - [ ] Publish a test post, confirm it appears at `/blog`, then delete it
