@@ -26,7 +26,7 @@ $breadcrumbs = [
     '@type'           => 'BreadcrumbList',
     'itemListElement' => [
         ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => url('/')],
-        ['@type' => 'ListItem', 'position' => 2, 'name' => 'Journal', 'item' => url('/blog')],
+        ['@type' => 'ListItem', 'position' => 2, 'name' => 'Blog', 'item' => url('/blog')],
         ['@type' => 'ListItem', 'position' => 3, 'name' => $post['title'], 'item' => url('/blog/' . $post['slug'])],
     ],
 ];
@@ -51,7 +51,7 @@ $breadcrumbs = [
                 <ol class="flex flex-wrap items-center gap-2">
                     <li><a href="/" class="link-underline">Home</a></li>
                     <li aria-hidden="true">/</li>
-                    <li><a href="/blog" class="link-underline">Journal</a></li>
+                    <li><a href="/blog" class="link-underline">Blog</a></li>
                     <?php if ($post['category_slug']): ?>
                         <li aria-hidden="true">/</li>
                         <li>
@@ -137,7 +137,7 @@ $breadcrumbs = [
                 <?php foreach ($related as $item): ?>
                     <li class="reveal lift bg-ink">
                         <a href="/blog/<?= e($item['slug']) ?>" class="flex h-full flex-col p-7">
-                            <p class="eyebrow"><?= e($item['category_name'] ?? 'Journal') ?></p>
+                            <p class="eyebrow"><?= e($item['category_name'] ?? 'Blog') ?></p>
                             <h3 class="mt-4 text-lg leading-snug"><?= e($item['title']) ?></h3>
                             <p class="prose-body mt-3 text-sm"><?= e(str_limit((string) $item['excerpt'], 100)) ?></p>
                         </a>

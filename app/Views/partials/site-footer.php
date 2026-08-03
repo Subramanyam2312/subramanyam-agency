@@ -60,8 +60,9 @@ $socials = array_filter([
                     <ul class="mt-4 space-y-2.5">
                         <?php foreach ([
                             'About'    => '/about',
+                            'Blog'     => '/blog',
+                            'Services' => '/services',
                             'Work'     => '/work',
-                            'Journal'  => '/blog',
                             'FAQ'      => '/faq',
                             'Contact'  => '/contact',
                         ] as $label => $href): ?>

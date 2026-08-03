@@ -73,7 +73,7 @@ $noindex   = (bool) ($meta['noindex'] ?? false);
     <link rel="stylesheet" href="<?= e(asset('/assets/css/app.css')) ?>">
 
     <link rel="alternate" type="application/rss+xml"
-          title="<?= e(Setting::get('site_name', config('app.name'))) ?> — Journal"
+          title="<?= e(Setting::get('site_name', config('app.name'))) ?> — Blog"
           href="<?= e(url('/feed.xml')) ?>">
 
     <?= $this->include('partials/site-schema') ?>

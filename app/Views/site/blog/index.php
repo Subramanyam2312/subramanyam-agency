@@ -3,7 +3,7 @@
 <?php $this->start('content'); ?>
 
 <?= $this->include('partials/page-hero', [
-    'eyebrow' => $category !== null ? 'Category' : 'Journal',
+    'eyebrow' => $category !== null ? 'Category' : 'Blog',
     'heading' => $category !== null ? $category['name'] : 'Working notes',
     'lede'    => $category !== null
         ? (string) ($category['description'] ?? '')
@@ -48,7 +48,7 @@
                 <?php foreach ($posts as $post): ?>
                     <li class="reveal lift bg-ink">
                         <a href="/blog/<?= e($post['slug']) ?>" class="flex h-full flex-col p-7">
-                            <p class="eyebrow"><?= e($post['category_name'] ?? 'Journal') ?></p>
+                            <p class="eyebrow"><?= e($post['category_name'] ?? 'Blog') ?></p>
                             <h2 class="mt-4 text-xl leading-snug"><?= e($post['title']) ?></h2>
                             <p class="prose-body mt-3 text-sm"><?= e(str_limit((string) $post['excerpt'], 130)) ?></p>
                             <p class="mt-auto pt-6 text-xs text-muted">

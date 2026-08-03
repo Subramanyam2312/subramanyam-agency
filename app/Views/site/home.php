@@ -320,15 +320,15 @@ $founderImg  = is_file($founderFile) ? $founderPath . '?v=' . filemtime($founder
      left in place rather than deleted, so the section can be restored later
      without a migration or any data re-entry. -->
 
-<!-- ======================================================== JOURNAL -->
+<!-- ========================================================== BLOG -->
 <?php if ($posts !== []): ?>
-    <section class="section rule" aria-labelledby="journal-heading">
+    <section class="section rule" aria-labelledby="blog-heading">
         <div class="container-site">
             <div class="flex flex-wrap items-end justify-between gap-6">
                 <div>
                     <p class="section-index">05</p>
-                    <h2 id="journal-heading" class="display-lg reveal mt-3">
-                        <?= e($block('blog_heading', 'From the journal')) ?>
+                    <h2 id="blog-heading" class="display-lg reveal mt-3">
+                        <?= e($block('blog_heading', 'From the blog')) ?>
                     </h2>
                 </div>
                 <a href="/blog" class="link-underline reveal text-sm text-muted hover:text-body">All posts</a>
@@ -338,7 +338,7 @@ $founderImg  = is_file($founderFile) ? $founderPath . '?v=' . filemtime($founder
                 <?php foreach ($posts as $post): ?>
                     <li class="reveal bg-ink transition-colors hover:bg-surface/60" data-tilt>
                         <a href="/blog/<?= e($post['slug']) ?>" class="flex h-full flex-col p-7">
-                            <p class="eyebrow"><?= e($post['category_name'] ?? 'Journal') ?></p>
+                            <p class="eyebrow"><?= e($post['category_name'] ?? 'Blog') ?></p>
                             <h3 class="mt-4 text-xl leading-snug"><?= e($post['title']) ?></h3>
                             <p class="prose-body mt-3 text-sm"><?= e(str_limit((string) $post['excerpt'], 120)) ?></p>
                             <p class="mt-6 text-xs text-muted">

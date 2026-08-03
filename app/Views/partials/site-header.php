@@ -6,17 +6,18 @@ $siteName = Setting::get('site_name', config('app.name'));
 
 $navigation = [
     ['label' => 'Home',     'href' => '/', 'exact' => true],
+    ['label' => 'About',    'href' => '/about'],
+    ['label' => 'Blog',     'href' => '/blog'],
     ['label' => 'Services', 'href' => '/services'],
     ['label' => 'Work',     'href' => '/work'],
-    ['label' => 'About',    'href' => '/about'],
-    ['label' => 'Journal',  'href' => '/blog'],
+    ['label' => 'Contact',  'href' => '/contact'],
 ];
 
 $currentPath = $currentPath ?? '/';
 
 /**
  * '/' would prefix-match every path, so the Home link is compared exactly while
- * the rest still highlight for their child pages (/blog/some-post lights Journal).
+ * the rest still highlight for their child pages (/blog/some-post lights Blog).
  */
 $isActive = static function (array $item) use ($currentPath): bool {
     return ($item['exact'] ?? false)
@@ -70,7 +71,6 @@ $isActive = static function (array $item) use ($currentPath): bool {
                     <?= e($item['label']) ?>
                 </a>
             <?php endforeach; ?>
-            <a href="/contact" class="display-md py-2 text-body">Contact</a>
         </nav>
 
         <div>
