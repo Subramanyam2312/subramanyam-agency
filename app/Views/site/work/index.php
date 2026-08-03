@@ -31,7 +31,7 @@ $coverFor = static function (string $slug): string {
                     <li class="reveal lift bg-ink">
                         <a href="/work/<?= e($case['slug']) ?>" class="group grid items-center gap-6 p-6 sm:gap-8 sm:p-8 lg:grid-cols-12">
                             <?php if ($cover !== ''): ?>
-                                <div class="overflow-hidden rounded-lg lg:col-span-4">
+                                <div class="overflow-hidden rounded-xl lg:col-span-6">
                                     <img src="<?= e($cover) ?>"
                                          alt="<?= e($case['title']) ?> — <?= e($case['client_name'] ?: $case['industry']) ?>"
                                          class="aspect-video w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
@@ -39,7 +39,7 @@ $coverFor = static function (string $slug): string {
                                 </div>
                             <?php endif; ?>
 
-                            <div class="<?= $cover !== '' ? 'lg:col-span-8' : 'lg:col-span-12' ?>">
+                            <div class="<?= $cover !== '' ? 'lg:col-span-6' : 'lg:col-span-12' ?>">
                                 <p class="eyebrow"><?= e($case['client_name'] ?: $case['industry']) ?></p>
                                 <h2 class="display-md mt-3 flex items-center gap-3">
                                     <?= e($case['title']) ?>
