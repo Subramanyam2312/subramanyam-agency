@@ -124,6 +124,14 @@ $noindex   = (bool) ($meta['noindex'] ?? false);
         </svg>
     </button>
 
+    <!-- Review bar, only when the page was opened from the CMS by a signed-in
+         user. Renders nothing otherwise, so visitors never see an admin control. -->
+    <?= $this->include('partials/admin-bar', [
+        'currentPath' => $currentPath,
+        'fromCms'     => $fromCms ?? false,
+        'editId'      => $case['id'] ?? $service['id'] ?? $post['id'] ?? null,
+    ]) ?>
+
     <script src="<?= e(asset('/assets/js/site.js')) ?>" defer></script>
 
     <?= $this->yieldSection('scripts') ?>

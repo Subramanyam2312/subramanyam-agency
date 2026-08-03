@@ -63,6 +63,14 @@ Session::start($request->isSecure());
 // Available to every template, so nav partials can mark the active item.
 View::share('currentPath', $request->path());
 
+/*
+ * Set when the page was opened from the CMS's "view live page" arrow, which is
+ * what puts the review bar on the page. It is only a hint about where the click
+ * came from — the bar itself still checks for a signed-in session, so adding the
+ * parameter by hand shows a visitor nothing.
+ */
+View::share('fromCms', $request->query('from') === 'cms');
+
 $router = new Router();
 // Firewall runs first: a rejected request never reaches CSRF, auth or a controller.
 // PageOptimise (cache + traffic) sits after SecurityHeaders so cached responses

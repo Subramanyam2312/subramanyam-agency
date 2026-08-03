@@ -153,7 +153,7 @@ $user = Auth::user();
 
                             <?php if (isset($item['live'])): ?>
                                 <!-- Separate link: an anchor cannot be nested inside another. -->
-                                <a href="<?= e($item['live']) ?>" target="_blank" rel="noopener"
+                                <a href="<?= e($item['live']) ?>?from=cms" target="_blank" rel="noopener"
                                    class="nav-live" title="Open <?= e($item['label']) ?> on the site">
                                     <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                          stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
