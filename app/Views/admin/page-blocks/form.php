@@ -1,13 +1,33 @@
 <?php $this->extend('layouts/admin'); ?>
 
-<?php $this->start('title'); ?><?= e(ucfirst(str_replace('-', ' ', $pageKey))) ?> copy<?php $this->stop(); ?>
+<?php $this->start('title'); ?><?= e(ucfirst(str_replace('-', ' ', $pageKey))) ?> copy<?php foreach ($repeatables as $groupId => $spec): ?>
+    <form method="post" id="add-<?= e($groupId) ?>"
+          action="/admin/page-content/<?= e($pageKey) ?>/items/<?= e($groupId) ?>"><?= csrf_field() ?></form>
+
+    <form method="post" id="remove-<?= e($groupId) ?>"
+          action="/admin/page-content/<?= e($pageKey) ?>/items/<?= e($groupId) ?>">
+        <?= csrf_field() ?><?= method_field('DELETE') ?>
+    </form>
+<?php endforeach; ?>
+<?php $this->stop(); ?>
 
 <?php $this->start('content'); ?>
 <?php
 /**
  * The form builds itself from whatever page_blocks rows exist, so adding a new
  * editable string to a template is an INSERT — this file never changes.
+ *
+ * Groups listed in config/repeatables.php also get Add and Remove buttons. Those
+ * submit to their own tiny forms rendered after this one and referenced by the
+ * HTML `form` attribute, because a form cannot be nested inside another.
  */
+$repeatables = $repeatables ?? [];
+
+/** Repeatable groups keyed by the group heading they belong under. */
+$repeatByGroup = [];
+foreach ($repeatables as $groupId => $spec) {
+    $repeatByGroup[$spec['group']][$groupId] = $spec;
+}
 ?>
 <form method="post" action="/admin/page-content/<?= e($pageKey) ?>" novalidate>
     <?= csrf_field() ?>
@@ -54,6 +74,21 @@
                             'value' => $value,
                         ]) ?>
                     <?php endif; ?>
+                <?php endforeach; ?>
+
+                <?php foreach ($repeatByGroup[$groupName] ?? [] as $groupId => $spec): ?>
+                    <div class="mt-5 flex flex-wrap items-center gap-3 border-t border-line/70 pt-5">
+                        <button type="submit" form="add-<?= e($groupId) ?>" class="btn-ghost">
+                            Add another <?= e($spec['noun']) ?>
+                        </button>
+                        <button type="submit" form="remove-<?= e($groupId) ?>" class="text-sm text-danger hover:underline"
+                                data-confirm="Remove the last <?= e($spec['noun']) ?>? Anything typed into it is lost.">
+                            Remove the last one
+                        </button>
+                        <span class="text-xs text-muted">
+                            Cards are added empty — fill one in and save, or leave it blank and it will not appear on the site.
+                        </span>
+                    </div>
                 <?php endforeach; ?>
             </div>
         <?php endforeach; ?>

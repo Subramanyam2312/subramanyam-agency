@@ -7,6 +7,7 @@ namespace App\Controllers\Admin;
 use App\Controllers\Controller;
 use App\Core\ActivityLogger;
 use App\Core\Auth;
+use App\Core\Database;
 use App\Core\HttpException;
 use App\Core\Request;
 use App\Core\Response;
@@ -17,9 +18,14 @@ use App\Models\PageBlock;
 /**
  * Editing screen for page copy.
  *
- * Not a ResourceController: blocks are never created or deleted through the UI —
- * they are defined by the templates that consume them. The editor only changes
- * values, and the form builds itself from whatever rows exist.
+ * Not a ResourceController: most blocks are defined by the templates that consume
+ * them, and the editor only changes values — the form builds itself from whatever
+ * rows exist.
+ *
+ * The exception is the repeatable card groups declared in config/repeatables.php
+ * (approach steps, client cards, credentials, FAQ entries). Those can be added and
+ * removed here, because the templates render however many exist rather than a
+ * fixed number.
  */
 final class PageBlockController extends Controller
 {
@@ -57,9 +63,10 @@ final class PageBlockController extends Controller
         }
 
         return $this->view('admin/page-blocks/form', [
-            'pageKey' => $pageKey,
-            'grouped' => $grouped,
-            'media'   => $media,
+            'pageKey'     => $pageKey,
+            'grouped'     => $grouped,
+            'media'       => $media,
+            'repeatables' => (array) config('repeatables.' . $pageKey, []),
         ]);
     }
 
@@ -115,4 +122,115 @@ final class PageBlockController extends Controller
 
         return $this->redirect('/admin/page-content/' . $pageKey);
     }
+
+    /**
+     * Adds the next card to a repeatable group by inserting its set of blocks.
+     */
+    public function addItem(Request $request): Response
+    {
+        $pageKey = (string) $request->param('page');
+        $groupId = (string) $request->param('group');
+        $spec    = $this->repeatable($pageKey, $groupId);
+
+        $next = $this->nextIndex($pageKey, $groupId, $spec);
+        $max  = (int) config('repeatables.max', 12);
+
+        if ($next > $max) {
+            $this->error('That section is already at its limit of ' . $max . '.');
+
+            return $this->redirect('/admin/page-content/' . $pageKey);
+        }
+
+        foreach ($spec['fields'] as $suffix => [$label, $type]) {
+            Database::query(
+                'INSERT INTO `page_blocks`
+                    (`page_key`, `block_key`, `label`, `type`, `value`, `group_name`, `sort_order`, `created_at`, `updated_at`)
+                 VALUES (:page, :block, :label, :type, \'\', :grp, :sort, NOW(), NOW())',
+                [
+                    ':page'  => $pageKey,
+                    ':block' => $groupId . '_' . $next . '_' . $suffix,
+                    ':label' => str_replace(':n', (string) $next, $label),
+                    ':type'  => $type,
+                    ':grp'   => $spec['group'],
+                    ':sort'  => (int) $spec['base'] + ($next * 10) + array_search($suffix, array_keys($spec['fields']), true),
+                ]
+            );
+        }
+
+        PageBlock::flushCache();
+        ActivityLogger::log('page_blocks.item_added', 'page_blocks', null, ['page' => $pageKey, 'group' => $groupId]);
+        $this->success('Added another ' . $spec['noun'] . '. Fill it in below, then save.');
+
+        return $this->redirect('/admin/page-content/' . $pageKey);
+    }
+
+    /**
+     * Removes the last card of a repeatable group.
+     *
+     * Only ever the last one: renumbering the middle of a group would silently
+     * rewrite block keys that the page is already rendering.
+     */
+    public function removeItem(Request $request): Response
+    {
+        $pageKey = (string) $request->param('page');
+        $groupId = (string) $request->param('group');
+        $spec    = $this->repeatable($pageKey, $groupId);
+
+        $last = $this->nextIndex($pageKey, $groupId, $spec) - 1;
+
+        if ($last < 1) {
+            $this->error('There is nothing left to remove there.');
+
+            return $this->redirect('/admin/page-content/' . $pageKey);
+        }
+
+        foreach (array_keys($spec['fields']) as $suffix) {
+            Database::query(
+                'DELETE FROM `page_blocks` WHERE `page_key` = :page AND `block_key` = :block',
+                [':page' => $pageKey, ':block' => $groupId . '_' . $last . '_' . $suffix]
+            );
+        }
+
+        PageBlock::flushCache();
+        ActivityLogger::log('page_blocks.item_removed', 'page_blocks', null, ['page' => $pageKey, 'group' => $groupId]);
+        $this->success('Removed the last ' . $spec['noun'] . '.');
+
+        return $this->redirect('/admin/page-content/' . $pageKey);
+    }
+
+    /**
+     * @return array{label:string,group:string,noun:string,base:int,fields:array<string,array{0:string,1:string}>}
+     */
+    private function repeatable(string $pageKey, string $groupId): array
+    {
+        $spec = config('repeatables.' . $pageKey . '.' . $groupId);
+
+        // Unknown page or group: refuse rather than invent blocks from a URL.
+        if (!is_array($spec)) {
+            throw new HttpException(404);
+        }
+
+        return $spec;
+    }
+
+    /** The first index with no blocks yet, i.e. the number the next card takes. */
+    private function nextIndex(string $pageKey, string $groupId, array $spec): int
+    {
+        $first = (string) array_key_first($spec['fields']);
+        $max   = (int) config('repeatables.max', 12);
+
+        for ($i = 1; $i <= $max + 1; $i++) {
+            $exists = Database::selectOne(
+                'SELECT `id` FROM `page_blocks` WHERE `page_key` = :page AND `block_key` = :block LIMIT 1',
+                [':page' => $pageKey, ':block' => $groupId . '_' . $i . '_' . $first]
+            );
+
+            if ($exists === null) {
+                return $i;
+            }
+        }
+
+        return $max + 1;
+    }
+
 }

@@ -18,16 +18,18 @@ $address   = Setting::get('address');
 
 $waLink = $whatsapp ? 'https://wa.me/' . preg_replace('/[^0-9]/', '', (string) $whatsapp) : '';
 
-/* Numbered blocks: an empty title removes that row rather than leaving a gap. */
+/* Numbered blocks: an empty title removes that row rather than leaving a gap.
+   Cards can be added in the CMS, so scan to the ceiling rather than a fixed count. */
+$max   = (int) config('repeatables.max', 12);
 $steps = [];
-for ($i = 1; $i <= 4; $i++) {
+for ($i = 1; $i <= $max; $i++) {
     if (($title = $block("step_{$i}_title")) !== '') {
         $steps[] = ['title' => $title, 'body' => $block("step_{$i}_body")];
     }
 }
 
 $faqs = [];
-for ($i = 1; $i <= 2; $i++) {
+for ($i = 1; $i <= $max; $i++) {
     if (($question = $block("faq_{$i}_q")) !== '') {
         $faqs[] = ['question' => $question, 'answer' => $block("faq_{$i}_a")];
     }

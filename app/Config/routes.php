@@ -138,6 +138,11 @@ return function (Router $router): void {
             $router->get('/page-content/{page:[a-z0-9-]+}', [PageBlockController::class, 'edit']);
             $router->patch('/page-content/{page:[a-z0-9-]+}', [PageBlockController::class, 'update']);
 
+            // Repeatable card groups: add or remove a card (approach steps,
+            // client cards, credentials, FAQ entries).
+            $router->post('/page-content/{page:[a-z0-9-]+}/items/{group:[a-z_]+}', [PageBlockController::class, 'addItem']);
+            $router->delete('/page-content/{page:[a-z0-9-]+}/items/{group:[a-z_]+}', [PageBlockController::class, 'removeItem']);
+
             // Media library.
             $router->get('/media', [MediaController::class, 'index']);
             $router->post('/media', [MediaController::class, 'store']);

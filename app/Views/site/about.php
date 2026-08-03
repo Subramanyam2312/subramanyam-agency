@@ -37,12 +37,15 @@ $repeat = static function (int $count, string $prefix, array $fields, string $re
     return $items;
 };
 
-$approach    = $repeat(5, 'approach_step', ['title', 'body'], 'title');
-$clients     = $repeat(4, 'client', ['name', 'meta', 'href', 'body'], 'name');
-$credentials = $repeat(3, 'cred', ['title', 'body'], 'title');
+/* Cards can be added in the CMS, so scan to the ceiling rather than a fixed count. */
+$max = (int) config('repeatables.max', 12);
+
+$approach    = $repeat($max, 'approach_step', ['title', 'body'], 'title');
+$clients     = $repeat($max, 'client', ['name', 'meta', 'href', 'body'], 'name');
+$credentials = $repeat($max, 'cred', ['title', 'body'], 'title');
 
 $faqs = [];
-foreach ($repeat(4, 'faq', ['q', 'a'], 'q') as $row) {
+foreach ($repeat($max, 'faq', ['q', 'a'], 'q') as $row) {
     $faqs[] = ['question' => $row['q'], 'answer' => $row['a']];
 }
 ?>
