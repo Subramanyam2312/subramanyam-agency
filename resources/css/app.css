@@ -781,6 +781,40 @@
     @apply rounded-full px-3 py-1.5 text-xs text-muted transition-colors hover:bg-raised hover:text-body;
   }
 
+  .admin-bar-status {
+    @apply px-2 text-xs text-muted;
+  }
+  .admin-bar-status[data-tone='ok']    { @apply text-positive; }
+  .admin-bar-status[data-tone='error'] { @apply text-danger; }
+
+  /* Inline editing. Only ever active for signed-in staff, and only after the
+     Edit text button is pressed, so a live page is never accidentally typed into. */
+  .is-inline-editing [data-edit] {
+    outline: 1px dashed rgb(var(--c-accent) / 0.55);
+    outline-offset: 4px;
+    border-radius: 2px;
+    cursor: text;
+    transition: outline-color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .is-inline-editing [data-edit]:hover {
+    outline-color: rgb(var(--c-accent) / 0.9);
+    background: rgb(var(--c-accent) / 0.06);
+  }
+
+  .is-inline-editing [data-edit]:focus {
+    outline: 2px solid rgb(var(--c-accent));
+    background: rgb(var(--c-accent) / 0.08);
+  }
+
+  /* A split heading is flattened to plain text while editing, so its per-word
+     reveal transforms must not fight the caret. */
+  .is-inline-editing [data-edit] .word,
+  .is-inline-editing [data-edit] .word > span {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
   @media (max-width: 640px) {
     /* Keep clear of the back-to-top button on small screens. */
     .admin-bar { @apply bottom-4 left-4 right-20 justify-center; }

@@ -53,17 +53,18 @@ foreach ($repeat(4, 'faq', ['q', 'a'], 'q') as $row) {
     'eyebrow' => $block('hero_eyebrow'),
     'heading' => $block('hero_heading', 'About'),
     'lede'    => $block('hero_lede'),
+    'editPage' => 'about',
 ]) ?>
 
 <!-- ============================================================ INTRO -->
 <section class="section rule">
     <div class="container-site grid items-center gap-12 lg:grid-cols-12">
         <div class="lg:col-span-7">
-            <p class="section-index"><?= e($block('intro_label')) ?></p>
-            <h2 class="display-lg reveal mt-3" data-split><?= e($block('intro_heading')) ?></h2>
+            <p class="section-index"<?= editable('about','intro_label') ?>><?= e($block('intro_label')) ?></p>
+            <h2 class="display-lg reveal mt-3" data-split<?= editable('about','intro_heading') ?>><?= e($block('intro_heading')) ?></h2>
 
             <!-- Rich text, sanitised on save. -->
-            <div class="prose-editorial reveal mt-8"><?= $block('intro_body') ?></div>
+            <div class="prose-editorial reveal mt-8"<?= editable('about','intro_body','html') ?>><?= $block('intro_body') ?></div>
 
             <div class="mt-8 flex flex-wrap gap-3">
                 <?php if ($label = $block('intro_cta_primary')): ?>
@@ -92,20 +93,20 @@ foreach ($repeat(4, 'faq', ['q', 'a'], 'q') as $row) {
     <section class="section rule" aria-labelledby="philosophy-heading">
         <div class="container-site grid gap-12 lg:grid-cols-12">
             <div class="lg:col-span-5">
-                <p class="section-index"><?= e($block('philosophy_label')) ?></p>
-                <h2 id="philosophy-heading" class="display-lg reveal mt-3" data-split>
+                <p class="section-index"<?= editable('about','philosophy_label') ?>><?= e($block('philosophy_label')) ?></p>
+                <h2 id="philosophy-heading" class="display-lg reveal mt-3" data-split<?= editable('about','philosophy_heading') ?>>
                     <?= e($block('philosophy_heading')) ?>
                 </h2>
             </div>
             <div class="lg:col-span-6 lg:col-start-7">
-                <div class="prose-editorial reveal"><?= $block('philosophy_body') ?></div>
+                <div class="prose-editorial reveal"<?= editable('about','philosophy_body','html') ?>><?= $block('philosophy_body') ?></div>
 
                 <div class="mt-8 grid gap-4 sm:grid-cols-2">
                     <?php for ($card = 1; $card <= 2; $card++): ?>
                         <?php if ($title = $block("philosophy_card_{$card}_title")): ?>
                             <div class="card-flat">
-                                <p class="eyebrow"><?= e($title) ?></p>
-                                <p class="prose-body mt-3 text-sm"><?= e($block("philosophy_card_{$card}_body")) ?></p>
+                                <p class="eyebrow"<?= editable('about', "philosophy_card_{$card}_title") ?>><?= e($title) ?></p>
+                                <p class="prose-body mt-3 text-sm"<?= editable('about', "philosophy_card_{$card}_body") ?>><?= e($block("philosophy_card_{$card}_body")) ?></p>
                             </div>
                         <?php endif; ?>
                     <?php endfor; ?>
@@ -119,17 +120,17 @@ foreach ($repeat(4, 'faq', ['q', 'a'], 'q') as $row) {
 <?php if ($approach !== []): ?>
     <section class="section rule" aria-labelledby="approach-heading">
         <div class="container-site">
-            <p class="section-index"><?= e($block('approach_label')) ?></p>
-            <h2 id="approach-heading" class="display-lg reveal mt-3" data-split><?= e($block('approach_heading')) ?></h2>
+            <p class="section-index"<?= editable('about','approach_label') ?>><?= e($block('approach_label')) ?></p>
+            <h2 id="approach-heading" class="display-lg reveal mt-3" data-split<?= editable('about','approach_heading') ?>><?= e($block('approach_heading')) ?></h2>
 
             <ol class="mt-12 divide-y divide-line/60 border-y border-line/60">
                 <?php foreach ($approach as $i => $step): ?>
                     <li class="reveal grid gap-4 py-8 sm:grid-cols-12">
                         <div class="sm:col-span-4">
                             <p class="font-mono text-sm text-accent"><?= sprintf('%02d', $i + 1) ?></p>
-                            <h3 class="display-md mt-2"><?= e($step['title']) ?></h3>
+                            <h3 class="display-md mt-2"<?= editable('about', 'approach_step_' . ($i + 1) . '_title') ?>><?= e($step['title']) ?></h3>
                         </div>
-                        <p class="prose-body text-sm sm:col-span-7 sm:col-start-6"><?= e($step['body']) ?></p>
+                        <p class="prose-body text-sm sm:col-span-7 sm:col-start-6"<?= editable('about', 'approach_step_' . ($i + 1) . '_body') ?>><?= e($step['body']) ?></p>
                     </li>
                 <?php endforeach; ?>
             </ol>
@@ -142,14 +143,14 @@ foreach ($repeat(4, 'faq', ['q', 'a'], 'q') as $row) {
     <section class="section rule" aria-labelledby="creative-heading">
         <div class="container-site grid gap-12 lg:grid-cols-12">
             <div class="lg:col-span-5">
-                <p class="section-index"><?= e($block('creative_label')) ?></p>
-                <h2 id="creative-heading" class="display-lg reveal mt-3" data-split><?= e($block('creative_heading')) ?></h2>
+                <p class="section-index"<?= editable('about','creative_label') ?>><?= e($block('creative_label')) ?></p>
+                <h2 id="creative-heading" class="display-lg reveal mt-3" data-split<?= editable('about','creative_heading') ?>><?= e($block('creative_heading')) ?></h2>
             </div>
             <div class="lg:col-span-6 lg:col-start-7">
-                <div class="prose-editorial reveal"><?= $block('creative_body') ?></div>
+                <div class="prose-editorial reveal"<?= editable('about','creative_body','html') ?>><?= $block('creative_body') ?></div>
 
                 <?php if ($highlight = $block('creative_highlight')): ?>
-                    <p class="prose-body reveal mt-5 border-l-2 border-accent/50 pl-5 text-body"><?= e($highlight) ?></p>
+                    <p class="prose-body reveal mt-5 border-l-2 border-accent/50 pl-5 text-body"<?= editable('about','creative_highlight') ?>><?= e($highlight) ?></p>
                 <?php endif; ?>
             </div>
         </div>
@@ -160,9 +161,9 @@ foreach ($repeat(4, 'faq', ['q', 'a'], 'q') as $row) {
 <?php if ($clients !== []): ?>
     <section class="section rule" aria-labelledby="track-heading">
         <div class="container-site">
-            <p class="section-index"><?= e($block('work_label')) ?></p>
-            <h2 id="track-heading" class="display-lg reveal mt-3" data-split><?= e($block('work_heading')) ?></h2>
-            <p class="lede mt-6"><?= e($block('work_lede')) ?></p>
+            <p class="section-index"<?= editable('about','work_label') ?>><?= e($block('work_label')) ?></p>
+            <h2 id="track-heading" class="display-lg reveal mt-3" data-split<?= editable('about','work_heading') ?>><?= e($block('work_heading')) ?></h2>
+            <p class="lede mt-6"<?= editable('about','work_lede') ?>><?= e($block('work_lede')) ?></p>
 
             <div class="mt-12 grid gap-6 sm:grid-cols-2">
                 <?php foreach ($clients as $client): ?>
@@ -183,7 +184,7 @@ foreach ($repeat(4, 'faq', ['q', 'a'], 'q') as $row) {
             </div>
 
             <?php if ($footnote = $block('work_footnote')): ?>
-                <p class="prose-body mt-10 max-w-2xl text-sm text-muted"><?= e($footnote) ?></p>
+                <p class="prose-body mt-10 max-w-2xl text-sm text-muted"<?= editable('about','work_footnote') ?>><?= e($footnote) ?></p>
             <?php endif; ?>
         </div>
     </section>
@@ -194,9 +195,9 @@ foreach ($repeat(4, 'faq', ['q', 'a'], 'q') as $row) {
     <section class="section rule" aria-labelledby="credentials-heading">
         <div class="container-site grid gap-12 lg:grid-cols-12">
             <div class="lg:col-span-5">
-                <p class="section-index"><?= e($block('cred_label')) ?></p>
-                <h2 id="credentials-heading" class="display-lg reveal mt-3" data-split><?= e($block('cred_heading')) ?></h2>
-                <p class="prose-body mt-6 text-sm text-muted"><?= e($block('cred_intro')) ?></p>
+                <p class="section-index"<?= editable('about','cred_label') ?>><?= e($block('cred_label')) ?></p>
+                <h2 id="credentials-heading" class="display-lg reveal mt-3" data-split<?= editable('about','cred_heading') ?>><?= e($block('cred_heading')) ?></h2>
+                <p class="prose-body mt-6 text-sm text-muted"<?= editable('about','cred_intro') ?>><?= e($block('cred_intro')) ?></p>
             </div>
             <ul class="space-y-4 lg:col-span-6 lg:col-start-7">
                 <?php foreach ($credentials as $cred): ?>
@@ -215,11 +216,11 @@ foreach ($repeat(4, 'faq', ['q', 'a'], 'q') as $row) {
     <section class="section rule" aria-labelledby="journey-heading">
         <div class="container-site grid gap-12 lg:grid-cols-12">
             <div class="lg:col-span-5">
-                <p class="section-index"><?= e($block('journey_label')) ?></p>
-                <h2 id="journey-heading" class="display-lg reveal mt-3" data-split><?= e($block('journey_heading')) ?></h2>
+                <p class="section-index"<?= editable('about','journey_label') ?>><?= e($block('journey_label')) ?></p>
+                <h2 id="journey-heading" class="display-lg reveal mt-3" data-split<?= editable('about','journey_heading') ?>><?= e($block('journey_heading')) ?></h2>
             </div>
             <div class="lg:col-span-6 lg:col-start-7">
-                <div class="prose-editorial reveal"><?= $block('journey_body') ?></div>
+                <div class="prose-editorial reveal"<?= editable('about','journey_body','html') ?>><?= $block('journey_body') ?></div>
                 <div class="prose-editorial reveal mt-6 border-l-2 border-accent/40 pl-5 text-sm">
                     <?= $block('journey_points') ?>
                 </div>
@@ -233,8 +234,8 @@ foreach ($repeat(4, 'faq', ['q', 'a'], 'q') as $row) {
     <section class="section rule" aria-labelledby="about-faq-heading">
         <div class="container-site grid gap-12 lg:grid-cols-12">
             <div class="lg:col-span-4">
-                <p class="section-index"><?= e($block('faq_label')) ?></p>
-                <h2 id="about-faq-heading" class="display-lg reveal mt-3" data-split><?= e($block('faq_heading')) ?></h2>
+                <p class="section-index"<?= editable('about','faq_label') ?>><?= e($block('faq_label')) ?></p>
+                <h2 id="about-faq-heading" class="display-lg reveal mt-3" data-split<?= editable('about','faq_heading') ?>><?= e($block('faq_heading')) ?></h2>
             </div>
             <div class="lg:col-span-7 lg:col-start-6">
                 <?= $this->include('partials/accordion', ['items' => $faqs, 'level' => 3]) ?>
@@ -247,9 +248,9 @@ foreach ($repeat(4, 'faq', ['q', 'a'], 'q') as $row) {
 <?php if ($block('cta_heading') !== ''): ?>
     <section class="section rule">
         <div class="container-site text-center">
-            <p class="eyebrow"><?= e($block('cta_eyebrow')) ?></p>
-            <h2 class="display-lg gilt reveal mx-auto mt-4 max-w-[22ch]"><?= e($block('cta_heading')) ?></h2>
-            <p class="lede mx-auto mt-6"><?= e($block('cta_lede')) ?></p>
+            <p class="eyebrow"<?= editable('about','cta_eyebrow') ?>><?= e($block('cta_eyebrow')) ?></p>
+            <h2 class="display-lg gilt reveal mx-auto mt-4 max-w-[22ch]"<?= editable('about','cta_heading') ?>><?= e($block('cta_heading')) ?></h2>
+            <p class="lede mx-auto mt-6"<?= editable('about','cta_lede') ?>><?= e($block('cta_lede')) ?></p>
             <div class="mt-9 flex flex-wrap justify-center gap-3">
                 <?php if ($label = $block('cta_primary')): ?>
                     <a href="<?= e($block('cta_primary_href', '/contact')) ?>" class="btn-bone"><?= e($label) ?></a>

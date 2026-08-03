@@ -48,7 +48,8 @@ if (isset($exact[$path])) {
     [$target, $label] = ['/admin', 'Open the CMS'];
 }
 ?>
-<div class="admin-bar" role="complementary" aria-label="Editing shortcuts">
+<div class="admin-bar" role="complementary" aria-label="Editing shortcuts"
+     data-admin-bar data-csrf="<?= e(csrf_token()) ?>">
     <a href="<?= e($target) ?>" class="admin-bar-edit">
         <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor"
              stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -64,3 +65,6 @@ if (isset($exact[$path])) {
         <button type="submit" class="admin-bar-link">Sign out</button>
     </form>
 </div>
+
+<!-- Staff-only, so it is never sent to a visitor. Self-hosted: 'self' covers it. -->
+<script src="<?= e(asset('/assets/js/inline-edit.js')) ?>" defer></script>
