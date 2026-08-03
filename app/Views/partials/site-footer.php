@@ -9,6 +9,7 @@ $services = Service::all(['is_active' => 1], 'sort_order ASC', 6);
 $socials = array_filter([
     'Instagram' => Setting::get('social_instagram'),
     'LinkedIn'  => Setting::get('social_linkedin'),
+    'Facebook'  => Setting::get('social_facebook'),
     'X'         => Setting::get('social_x'),
     'YouTube'   => Setting::get('social_youtube'),
 ]);
@@ -97,6 +98,18 @@ $socials = array_filter([
                             <a href="mailto:<?= e($email) ?>" class="link-underline text-muted hover:text-body">
                                 <?= e($email) ?>
                             </a>
+                        </p>
+                    <?php endif; ?>
+
+                    <?php if ($phone = Setting::get('contact_phone')): ?>
+                        <p class="mt-2 text-sm text-muted">
+                            <a href="tel:<?= e(preg_replace('/[^+0-9]/', '', (string) $phone)) ?>"
+                               class="link-underline hover:text-body"><?= e($phone) ?></a>
+                            <?php if ($wa = Setting::get('whatsapp_number')): ?>
+                                <span class="mx-1.5 text-muted">·</span>
+                                <a href="https://wa.me/<?= e(preg_replace('/[^0-9]/', '', (string) $wa)) ?>"
+                                   rel="noopener" target="_blank" class="link-underline hover:text-body">WhatsApp</a>
+                            <?php endif; ?>
                         </p>
                     <?php endif; ?>
                 </div>

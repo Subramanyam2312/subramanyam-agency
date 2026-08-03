@@ -17,6 +17,7 @@ $siteName = (string) Setting::get('site_name', config('app.name'));
 $sameAs = array_values(array_filter([
     Setting::get('social_instagram'),
     Setting::get('social_linkedin'),
+    Setting::get('social_facebook'),
     Setting::get('social_x'),
     Setting::get('social_youtube'),
 ]));
