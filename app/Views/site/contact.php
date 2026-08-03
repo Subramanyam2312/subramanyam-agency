@@ -1,10 +1,14 @@
 <?php
 
+use App\Models\PageBlock;
 use App\Models\Setting;
 
 $this->extend('layouts/site');
 
-/* Contact channels, from Settings so they stay CMS-editable. */
+/** Every string on this page comes from Content -> Page copy -> contact. */
+$block = static fn (string $key, string $default = ''): string => PageBlock::value('contact', $key, $default);
+
+/* Contact channels come from Settings, so they stay in one place site-wide. */
 $email     = Setting::get('contact_email');
 $phone     = Setting::get('contact_phone');
 $whatsapp  = Setting::get('whatsapp_number');
@@ -14,46 +18,37 @@ $address   = Setting::get('address');
 
 $waLink = $whatsapp ? 'https://wa.me/' . preg_replace('/[^0-9]/', '', (string) $whatsapp) : '';
 
-/* "What happens next" — the actual sequence. */
-$steps = [
-    ['t' => 'We talk, no obligation',
-     'b' => "A short call or exchange to understand the business, not to sell you anything. I want to know who your real buyer is, what you've already tried, and where the funnel leaks."],
-    ['t' => 'I give you an honest read',
-     'b' => "I'll tell you what I think is actually going on — including the parts that aren't flattering — and whether strategy, creative, SEO or some mix of them is where your money should go first. If I'm not the right person for it, you'll hear that here."],
-    ['t' => 'A plan you can see',
-     'b' => "If we're a fit, I put together a clear plan: what we're doing, in what order, and what we're spending where. Nothing hidden behind jargon."],
-    ['t' => 'Make it, test it, scale what works',
-     'b' => "We build the creative and set things live, start small, and let the evidence decide what to scale. I'll flag early if something isn't working instead of defending it — correcting course fast is cheaper than dressing it up."],
-];
+/* Numbered blocks: an empty title removes that row rather than leaving a gap. */
+$steps = [];
+for ($i = 1; $i <= 4; $i++) {
+    if (($title = $block("step_{$i}_title")) !== '') {
+        $steps[] = ['title' => $title, 'body' => $block("step_{$i}_body")];
+    }
+}
 
-/* Honest answers. */
-$faqs = [
-    ['question' => 'Is the first call just a sales pitch in disguise?',
-     'answer'   => "No. It's there to figure out whether I can actually help your business. If I can't see a real result in it for you, I'll say so directly rather than take the work."],
-    ['question' => 'Do you only take big brands?',
-     'answer'   => 'No. I keep a small roster and work with both new brands on tight budgets and established ones. For smaller brands, the whole approach is testing before scaling so nothing gets wasted.'],
-];
+$faqs = [];
+for ($i = 1; $i <= 2; $i++) {
+    if (($question = $block("faq_{$i}_q")) !== '') {
+        $faqs[] = ['question' => $question, 'answer' => $block("faq_{$i}_a")];
+    }
+}
 ?>
 
 <?php $this->start('content'); ?>
 
 <?= $this->include('partials/page-hero', [
-    'eyebrow' => 'Contact',
-    'heading' => "Let's have a straight conversation",
-    'lede'    => 'Tell me where you\'re trying to get to. I work with a small number of brands at a time, so I read every enquiry myself and reply within one business day.',
+    'eyebrow' => $block('hero_eyebrow', 'Contact'),
+    'heading' => $block('hero_heading', 'Start a conversation'),
+    'lede'    => $block('hero_lede'),
 ]) ?>
 
 <!-- ===================================================== FORM + DETAILS -->
 <section id="say-hello" class="section rule">
     <div class="container-site grid gap-14 lg:grid-cols-12">
         <div class="lg:col-span-7">
-            <p class="section-index">Say hello</p>
-            <h2 class="display-md reveal mt-3">No pitch dressed up as a call</h2>
-            <p class="prose-body reveal mt-4 max-w-xl text-sm">
-                Fill in the form and tell me what you're working on — what the brand is, where you feel stuck,
-                and what "working" would look like for you. If I think I can help, I'll say how. If I don't,
-                I'll tell you that too and point you somewhere better.
-            </p>
+            <p class="section-index"><?= e($block('form_label')) ?></p>
+            <h2 class="display-md reveal mt-3"><?= e($block('form_heading')) ?></h2>
+            <p class="prose-body reveal mt-4 max-w-xl text-sm"><?= e($block('form_intro')) ?></p>
 
             <?= $this->include('partials/site-flash') ?>
 
@@ -100,17 +95,15 @@ $faqs = [
                 </div>
 
                 <div class="mt-7 flex flex-wrap items-center gap-4">
-                    <button type="submit" class="btn-bone">Send message</button>
-                    <p class="text-xs text-muted">
-                        <?= e(\App\Models\PageBlock::value('contact', 'response_note', 'I reply within one business day.')) ?>
-                    </p>
+                    <button type="submit" class="btn-bone"><?= e($block('form_button', 'Send message')) ?></button>
+                    <p class="text-xs text-muted"><?= e($block('response_note')) ?></p>
                 </div>
             </form>
         </div>
 
         <aside class="lg:col-span-4 lg:col-start-9">
-            <p class="section-index">Contact details</p>
-            <p class="prose-body reveal mt-3 text-sm">Prefer a direct line? Reach me on any of these.</p>
+            <p class="section-index"><?= e($block('details_label')) ?></p>
+            <p class="prose-body reveal mt-3 text-sm"><?= e($block('details_intro')) ?></p>
 
             <div class="mt-7 space-y-7">
                 <?php if ($email): ?>
@@ -161,54 +154,60 @@ $faqs = [
 </section>
 
 <!-- ==================================================== WHAT HAPPENS NEXT -->
-<section class="section rule" aria-labelledby="next-heading">
-    <div class="container-site">
-        <p class="section-index">What happens next</p>
-        <h2 id="next-heading" class="display-lg reveal mt-3" data-split>From first message to live work</h2>
-        <p class="lede mt-6">I'd rather you know exactly how this goes than wonder. Here's the actual sequence.</p>
+<?php if ($steps !== []): ?>
+    <section class="section rule" aria-labelledby="next-heading">
+        <div class="container-site">
+            <p class="section-index"><?= e($block('next_label')) ?></p>
+            <h2 id="next-heading" class="display-lg reveal mt-3" data-split><?= e($block('next_heading')) ?></h2>
+            <p class="lede mt-6"><?= e($block('next_lede')) ?></p>
 
-        <ol class="mt-12 divide-y divide-line/60 border-y border-line/60">
-            <?php foreach ($steps as $i => $step): ?>
-                <li class="reveal grid gap-4 py-8 sm:grid-cols-12">
-                    <div class="sm:col-span-4">
-                        <p class="font-mono text-sm text-accent"><?= sprintf('%02d', $i + 1) ?></p>
-                        <h3 class="display-md mt-2"><?= e($step['t']) ?></h3>
-                    </div>
-                    <p class="prose-body text-sm sm:col-span-7 sm:col-start-6"><?= e($step['b']) ?></p>
-                </li>
-            <?php endforeach; ?>
-        </ol>
-    </div>
-</section>
+            <ol class="mt-12 divide-y divide-line/60 border-y border-line/60">
+                <?php foreach ($steps as $i => $step): ?>
+                    <li class="reveal grid gap-4 py-8 sm:grid-cols-12">
+                        <div class="sm:col-span-4">
+                            <p class="font-mono text-sm text-accent"><?= sprintf('%02d', $i + 1) ?></p>
+                            <h3 class="display-md mt-2"><?= e($step['title']) ?></h3>
+                        </div>
+                        <p class="prose-body text-sm sm:col-span-7 sm:col-start-6"><?= e($step['body']) ?></p>
+                    </li>
+                <?php endforeach; ?>
+            </ol>
+        </div>
+    </section>
+<?php endif; ?>
 
 <!-- ============================================================== FAQ -->
-<section class="section rule" aria-labelledby="contact-faq-heading">
-    <div class="container-site grid gap-12 lg:grid-cols-12">
-        <div class="lg:col-span-4">
-            <p class="section-index">Straight answers</p>
-            <h2 id="contact-faq-heading" class="display-lg reveal mt-3" data-split>A couple of honest answers</h2>
+<?php if ($faqs !== []): ?>
+    <section class="section rule" aria-labelledby="contact-faq-heading">
+        <div class="container-site grid gap-12 lg:grid-cols-12">
+            <div class="lg:col-span-4">
+                <p class="section-index"><?= e($block('faq_label')) ?></p>
+                <h2 id="contact-faq-heading" class="display-lg reveal mt-3" data-split><?= e($block('faq_heading')) ?></h2>
+            </div>
+            <div class="lg:col-span-7 lg:col-start-6">
+                <?= $this->include('partials/accordion', ['items' => $faqs, 'level' => 3]) ?>
+            </div>
         </div>
-        <div class="lg:col-span-7 lg:col-start-6">
-            <?= $this->include('partials/accordion', ['items' => $faqs, 'level' => 3]) ?>
-        </div>
-    </div>
-</section>
+    </section>
+<?php endif; ?>
 
 <!-- ============================================================== CTA -->
-<section class="section rule">
-    <div class="container-site text-center">
-        <p class="eyebrow">Let's work together</p>
-        <h2 class="display-lg gilt reveal mx-auto mt-4 max-w-[24ch]">Strategy and creative from the same place</h2>
-        <p class="lede mx-auto mt-6">
-            Grounded in what actually works rather than what sounds good on a deck. Reach out and tell me where you're headed.
-        </p>
-        <div class="mt-9 flex flex-wrap justify-center gap-3">
-            <a href="#say-hello" class="btn-bone">Send a message</a>
-            <?php if ($waLink): ?>
-                <a href="<?= e($waLink) ?>" rel="noopener" target="_blank" class="btn-outline">Message on WhatsApp</a>
-            <?php endif; ?>
+<?php if ($block('cta_heading') !== ''): ?>
+    <section class="section rule">
+        <div class="container-site text-center">
+            <p class="eyebrow"><?= e($block('cta_eyebrow')) ?></p>
+            <h2 class="display-lg gilt reveal mx-auto mt-4 max-w-[24ch]"><?= e($block('cta_heading')) ?></h2>
+            <p class="lede mx-auto mt-6"><?= e($block('cta_lede')) ?></p>
+            <div class="mt-9 flex flex-wrap justify-center gap-3">
+                <?php if ($label = $block('cta_primary')): ?>
+                    <a href="#say-hello" class="btn-bone"><?= e($label) ?></a>
+                <?php endif; ?>
+                <?php if ($waLink): ?>
+                    <a href="<?= e($waLink) ?>" rel="noopener" target="_blank" class="btn-outline">Message on WhatsApp</a>
+                <?php endif; ?>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
+<?php endif; ?>
 
 <?php $this->stop(); ?>
