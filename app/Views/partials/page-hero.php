@@ -10,15 +10,6 @@
  */
 $eyebrow = $eyebrow ?? '';
 $lede    = $lede ?? '';
-
-/**
- * Pages whose hero comes from page blocks pass $editPage, which makes the three
- * strings inline-editable for staff. It relies on the hero_* naming being the
- * same on every such page; a page that does not pass it is simply not editable
- * from here, which is the correct default for a hero built from a record.
- */
-$editPage = $editPage ?? '';
-$edit     = static fn (string $key): string => $editPage === '' ? '' : editable($editPage, $key);
 ?>
 <section class="relative isolate overflow-hidden pb-16 pt-36 sm:pb-20 sm:pt-44">
     <div class="hero-motion absolute inset-0 -z-20 opacity-60" aria-hidden="true"></div>
@@ -28,13 +19,13 @@ $edit     = static fn (string $key): string => $editPage === '' ? '' : editable(
 
     <div class="container-site">
         <?php if ($eyebrow !== ''): ?>
-            <p class="eyebrow"<?= $edit('hero_eyebrow') ?>><?= e($eyebrow) ?></p>
+            <p class="eyebrow"><?= e($eyebrow) ?></p>
         <?php endif; ?>
 
-        <h1 class="display-lg gilt mt-5 max-w-[20ch] is-visible" data-split<?= $edit('hero_heading') ?>><?= e($heading) ?></h1>
+        <h1 class="display-lg gilt mt-5 max-w-[20ch] is-visible" data-split><?= e($heading) ?></h1>
 
         <?php if ($lede !== ''): ?>
-            <p class="lede mt-7"<?= $edit('hero_lede') ?>><?= e($lede) ?></p>
+            <p class="lede mt-7"><?= e($lede) ?></p>
         <?php endif; ?>
     </div>
 </section>

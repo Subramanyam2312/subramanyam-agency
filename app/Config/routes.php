@@ -119,10 +119,6 @@ return function (Router $router): void {
             // Live RankMath-style SEO analysis for the editor (read-only, JSON).
             $router->post('/seo/analyze', [\App\Controllers\Admin\SeoController::class, 'analyze']);
 
-            // Saves edits made on the public page. Same write as the page-copy
-            // form, so it sits behind the same session and CSRF checks.
-            $router->post('/inline-edit', [\App\Controllers\Admin\InlineEditController::class, 'save']);
-
             $resource($router, '/posts', PostController::class);
             $resource($router, '/categories', CategoryController::class);
             $resource($router, '/services', ServiceController::class, true);

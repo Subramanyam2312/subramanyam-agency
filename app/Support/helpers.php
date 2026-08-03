@@ -178,30 +178,3 @@ if (!function_exists('json_column')) {
         return is_array($decoded) ? $decoded : [];
     }
 }
-
-if (!function_exists('editable')) {
-    /**
-     * Marks an element as inline-editable for signed-in staff.
-     *
-     * Prints the data attributes inline-edit.js looks for, and nothing at all for
-     * a guest — so the public HTML is byte-identical to what it was before, and
-     * there is no hint that an editing surface exists.
-     *
-     * The value still has to survive the same sanitiser as the CMS form: the save
-     * endpoint reads the block's declared type from the database rather than
-     * trusting anything sent from the page.
-     */
-    function editable(string $page, string $block, string $type = 'text'): string
-    {
-        if (!App\Core\Auth::check()) {
-            return '';
-        }
-
-        return sprintf(
-            ' data-edit="%s" data-edit-block="%s" data-edit-type="%s"',
-            e($page),
-            e($block),
-            $type === 'html' ? 'html' : 'text'
-        );
-    }
-}
