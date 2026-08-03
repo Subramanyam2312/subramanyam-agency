@@ -37,7 +37,7 @@ final class BlogController extends Controller
 
         $result = $this->query($search, $category === null ? null : (int) $category['id'], $page);
 
-        $title = $category !== null ? $category['name'] : 'Journal';
+        $title = $category !== null ? $category['name'] : 'Blog';
 
         return $this->view('site/blog/index', [
             'posts'      => $result['data'],
