@@ -95,6 +95,12 @@ final class PageController extends Controller
             throw new HttpException(404, 'That case study does not exist.');
         }
 
+        // File-based cover doubles as the social share image when present.
+        $coverRel = '/uploads/work/' . $case['slug'] . '.jpg';
+        $ogImage  = is_file(PUBLIC_PATH . $coverRel)
+            ? rtrim((string) config('app.url'), '/') . $coverRel
+            : null;
+
         return $this->view('site/work/show', [
             'case'    => $case,
             'service' => $case['service_id'] ? Service::find((int) $case['service_id']) : null,
@@ -106,6 +112,7 @@ final class PageController extends Controller
             'meta'    => [
                 'title'       => $case['meta_title'] ?: $case['title'],
                 'description' => $case['meta_description'] ?: $case['challenge'],
+                'og_image'    => $ogImage,
                 'noindex'     => (bool) $case['noindex'],
             ],
         ]);

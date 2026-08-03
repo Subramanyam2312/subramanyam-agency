@@ -2,12 +2,29 @@
 
 <?php $metrics = is_array($case['metrics']) ? $case['metrics'] : []; ?>
 
+<?php
+/** File-based cover for this case study, cache-busted by mtime; '' if none. */
+$coverPath = '/uploads/work/' . $case['slug'] . '.jpg';
+$coverFile = PUBLIC_PATH . $coverPath;
+$cover     = is_file($coverFile) ? $coverPath . '?v=' . filemtime($coverFile) : '';
+?>
+
 <?php $this->start('content'); ?>
 
 <?= $this->include('partials/page-hero', [
     'eyebrow' => trim(($case['client_name'] ?? '') . ' · ' . ($case['industry'] ?? ''), ' ·'),
     'heading' => $case['title'],
 ]) ?>
+
+<?php if ($cover !== ''): ?>
+    <div class="rule">
+        <div class="container-site pb-4">
+            <img src="<?= e($cover) ?>" alt="<?= e($case['title']) ?>"
+                 class="aspect-video w-full rounded-card object-cover"
+                 width="1600" height="900" fetchpriority="high" decoding="async">
+        </div>
+    </div>
+<?php endif; ?>
 
 <?php if ($metrics !== []): ?>
     <section class="rule py-12" aria-label="Results">
