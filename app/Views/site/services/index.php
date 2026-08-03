@@ -4,8 +4,8 @@
 
 <?= $this->include('partials/page-hero', [
     'eyebrow' => 'Services',
-    'heading' => 'Four disciplines, run so they compound',
-    'lede'    => 'Each one stands on its own. Together they stop competing for credit and start reinforcing each other.',
+    'heading' => 'One place for the strategy and the making',
+    'lede'    => 'The parts of marketing most people split across separate hires — strategy, creative, SEO, social, paid and the site itself — handled by one person, so the plan and the work never point in different directions.',
 ]) ?>
 
 <section class="section rule" aria-label="All services">
