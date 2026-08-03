@@ -31,12 +31,17 @@ final class ContactController extends Controller
 
     public function show(Request $request): Response
     {
+        $ogImage = is_file(PUBLIC_PATH . '/uploads/founder/founder.jpg')
+            ? rtrim((string) config('app.url'), '/') . '/uploads/founder/founder.jpg'
+            : null;
+
         return $this->view('site/contact', [
             'services' => Service::options(),
             'budgets'  => self::BUDGETS,
             'meta'     => [
-                'title'       => 'Contact',
-                'description' => 'Tell us what you are working on and what is in the way. We reply within one working day.',
+                'title'       => 'Contact Subramanyam M N — Digital Marketing Strategist in Chennai',
+                'description' => "Get in touch with Subramanyam M N — digital marketing strategist and content creator in Chennai. A straight conversation about strategy, ad creative, video and SEO. No obligation.",
+                'og_image'    => $ogImage,
             ],
         ]);
     }
