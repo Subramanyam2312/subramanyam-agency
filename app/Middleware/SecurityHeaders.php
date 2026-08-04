@@ -25,7 +25,30 @@ final class SecurityHeaders implements Middleware
 
         $config = (array) config('security.headers');
 
-        $response->header('Content-Security-Policy', $this->buildCsp($request));
+        $csp = $this->buildCsp($request);
+
+        $response->header('Content-Security-Policy', $csp);
+
+        /*
+         * Carrier copy of the policy, for hosts that overwrite Content-Security-Policy
+         * above PHP.
+         *
+         * Hostinger's platform layer replaces whatever the application sets with a bare
+         * `upgrade-insecure-requests`, which silently discards the entire policy — the
+         * nonces still go out in the HTML but nothing enforces them, so script-src stops
+         * protecting the site. Proven by setting a distinctive policy in PHP and reading
+         * the wire: headers_list() showed it, the response did not. Custom headers are
+         * NOT rewritten, and mod_headers runs after the rewrite, so .htaccess copies this
+         * one back over Content-Security-Policy and unsets it (see public/.htaccess).
+         *
+         * A static .htaccess policy could not do this alone: the value changes every
+         * request because it carries the nonce.
+         *
+         * Harmless where the rewrite does not happen — the .htaccess rule is a no-op and
+         * this header is simply ignored.
+         */
+        $response->header('X-App-Csp', $csp);
+
         $response->header('X-Content-Type-Options', 'nosniff');
         $response->header('X-Frame-Options', (string) $config['frame_options']);
         $response->header('Referrer-Policy', (string) $config['referrer_policy']);

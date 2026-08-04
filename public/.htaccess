@@ -73,6 +73,22 @@ Options -Indexes
     Header always set X-Content-Type-Options "nosniff"
     Header always unset X-Powered-By
     Header always unset Server
+
+    # Restore the application's Content-Security-Policy.
+    #
+    # Hostinger's platform layer overwrites Content-Security-Policy above PHP, replacing
+    # the whole policy with a bare `upgrade-insecure-requests`. The nonces still reach the
+    # browser but nothing enforces them, so script-src stops protecting the site.
+    #
+    # Custom headers are not rewritten and mod_headers runs after the rewrite, so the app
+    # sends its policy as X-App-Csp (SecurityHeaders) and we copy it back here, then drop
+    # the carrier so it never reaches the client. This is what keeps the per-request nonce
+    # — a hardcoded policy here could not, because the value changes every response.
+    #
+    # The condition means that if the header is ever absent we leave whatever is already
+    # set alone rather than writing an empty, and therefore useless, policy.
+    Header always set Content-Security-Policy "expr=%{resp:X-App-Csp}" "expr=-n %{resp:X-App-Csp}"
+    Header always unset X-App-Csp
 </IfModule>
 
 # Long cache for fingerprinted assets. asset() appends ?v=<mtime>, so a changed
