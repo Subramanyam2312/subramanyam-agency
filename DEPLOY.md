@@ -50,6 +50,22 @@ Checked on the live server, so several steps below are done:
 
 That removes step 2 and most of step 6.
 
+### Hostinger runs MariaDB, not MySQL
+
+Worth knowing before writing any migration: local development here uses MySQL 8.4,
+the server uses MariaDB. They are close but not identical, and the difference is
+only discovered at import time, when a dump fails half way and leaves some tables
+created and the rest missing.
+
+The one that caught this deploy was an expression index —
+`CREATE INDEX ... ON page_blocks ((draft_value IS NOT NULL))` — which MySQL 8
+accepts and MariaDB rejects with a #1064 syntax error. Avoid expression indexes,
+`CHECK` constraints and `DEFAULT (expression)` in migrations.
+
+A failed import is recoverable: the dump is written with `DROP TABLE IF EXISTS`
+before every table, so fixing the cause and importing again cleans up whatever the
+partial run left behind.
+
 ### Back it up first
 
 Even replacing it: hPanel → **Files → Backups → Create backup**, or download

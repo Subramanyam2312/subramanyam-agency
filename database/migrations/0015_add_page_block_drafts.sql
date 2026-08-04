@@ -12,5 +12,6 @@
 ALTER TABLE `page_blocks`
     ADD COLUMN `draft_value` LONGTEXT NULL DEFAULT NULL AFTER `value`;
 
--- Finding pending edits is a per-request question on the admin, so it gets an index.
-CREATE INDEX `idx_page_blocks_draft` ON `page_blocks` ((`draft_value` IS NOT NULL));
+-- No index on draft_value. An expression index would need MySQL 8, and Hostinger
+-- runs MariaDB, which cannot parse one — the dump would fail to import. The table
+-- holds a couple of hundred rows, so counting pending drafts is a trivial scan.
