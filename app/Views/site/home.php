@@ -109,15 +109,20 @@ $founderImg  = is_file($founderFile) ? $founderPath . '?v=' . filemtime($founder
                             <span class="founder-rim" aria-hidden="true"></span>
                         </div>
 
-                        <div class="founder-chip founder-chip--roi" aria-hidden="true">
-                            <span>+180%<small>organic pipeline</small></span>
-                        </div>
-                        <div class="founder-chip founder-chip--roas" aria-hidden="true">
-                            <span>3.1&times;<small>blended ROAS</small></span>
-                        </div>
-                        <div class="founder-chip founder-chip--cpl" aria-hidden="true">
-                            <span>&minus;42%<small>cost / lead</small></span>
-                        </div>
+                        <?php
+                        /* Editable in Content -> Page copy -> home -> Hero chips.
+                           Emptying a headline removes that chip, so a claim is
+                           never left on the hero by accident. */
+                        $chipPositions = ['founder-chip--roi', 'founder-chip--roas', 'founder-chip--cpl'];
+                        ?>
+                        <?php foreach ($chipPositions as $slot => $position): ?>
+                            <?php $chipValue = $block('hero_chip_' . ($slot + 1) . '_value'); ?>
+                            <?php if ($chipValue !== ''): ?>
+                                <div class="founder-chip <?= e($position) ?>" aria-hidden="true">
+                                    <span><?= e($chipValue) ?><small><?= e($block('hero_chip_' . ($slot + 1) . '_label')) ?></small></span>
+                                </div>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
 
                         <div class="founder-scan" aria-hidden="true"></div>
                     </div>
