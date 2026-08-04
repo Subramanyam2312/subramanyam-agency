@@ -34,6 +34,16 @@ if (PHP_SAPI !== 'cli') {
 
 $failures = [];
 $passes   = 0;
+$skipped  = [];
+
+/**
+ * True when running from a development checkout rather than a deployed server.
+ *
+ * `.env.example` is a repository file and is deliberately NOT uploaded — shipping a
+ * second env file to a live server is pointless at best. Its absence is therefore
+ * how we tell the two environments apart.
+ */
+$isRepoCheckout = is_file(BASE_PATH . '/.env.example');
 
 function check(string $label, bool $ok, string $detail = ''): void
 {
@@ -46,6 +56,39 @@ function check(string $label, bool $ok, string $detail = ''): void
         $failures[] = $label . ($detail !== '' ? ' — ' . $detail : '');
         printf("  [FAIL] %s%s\n", $label, $detail !== '' ? ' — ' . $detail : '');
     }
+}
+
+/**
+ * Records a check that cannot be evaluated here. Skips never fail the run: a check
+ * that is inapplicable is not a finding, and treating it as one trains people to
+ * ignore the audit's exit code — which is the only thing that makes it a usable gate.
+ */
+function skip(string $label, string $why): void
+{
+    global $skipped;
+
+    $skipped[] = $label;
+    printf("  [skip] %s — %s\n", $label, $why);
+}
+
+/**
+ * Runs a check only in a development checkout.
+ *
+ * These assert what the REPOSITORY ships, so they are meaningful before a deploy and
+ * meaningless after one. Run the audit before you upload, which is when a bad default
+ * can still be caught.
+ */
+function repo_check(string $label, callable $test, string $detail = ''): void
+{
+    global $isRepoCheckout;
+
+    if (!$isRepoCheckout) {
+        skip($label, 'no .env.example, so this is a deployed server, not a checkout');
+
+        return;
+    }
+
+    check($label, (bool) $test(), $detail);
 }
 
 /**
@@ -378,11 +421,11 @@ check('.env is git-ignored', (function (): bool {
     return is_string($ignore) && preg_match('/^\.env\s*$/m', $ignore) === 1;
 })());
 
-check('.env.example ships without a key', (function (): bool {
+repo_check('.env.example ships without a key', static function (): bool {
     $example = @file_get_contents(BASE_PATH . '/.env.example');
 
     return is_string($example) && preg_match('/^APP_KEY=\s*$/m', $example) === 1;
-})());
+});
 
 check('app/ is outside the web root', !is_dir(PUBLIC_PATH . '/app'));
 check('storage/ is outside the web root', !is_dir(PUBLIC_PATH . '/storage'));
@@ -404,14 +447,27 @@ check('web root .htaccess forces HTTPS and disables listings', (function (): boo
         && str_contains($htaccess, 'https://%{HTTP_HOST}');
 })());
 
-check('debug is off by default in .env.example', (function (): bool {
+repo_check('debug is off by default in .env.example', static function (): bool {
     $example = @file_get_contents(BASE_PATH . '/.env.example');
 
     return is_string($example) && preg_match('/^APP_DEBUG=false\s*$/m', $example) === 1;
-})());
+});
 
-check('HSTS ships disabled', config('security.headers.hsts') === false
-    || (bool) env('SECURITY_HSTS', false) === false);
+/*
+ * Asserts the SHIPPING DEFAULT, not the live value.
+ *
+ * This deliberately no longer inspects the running config. Enabling HSTS is the
+ * correct thing to do once HTTPS is confirmed on a domain, and the old check read
+ * the runtime value — so every live server with HSTS properly turned on reported a
+ * failure and the audit exited non-zero forever after. What actually matters is that
+ * a fresh deploy STARTS with it off, because HSTS cannot be retracted within its
+ * max-age: turning it on before HTTPS works can strand a domain.
+ */
+repo_check('HSTS is off by default in .env.example', static function (): bool {
+    $example = @file_get_contents(BASE_PATH . '/.env.example');
+
+    return is_string($example) && preg_match('/^SECURITY_HSTS=false\s*$/m', $example) === 1;
+});
 
 // ----------------------------------------------------------------- runtime
 
@@ -436,12 +492,20 @@ if (config('app.env') === 'production' && config('app.debug')) {
 
 echo "\n" . str_repeat('=', 62) . "\n";
 
+$note = $skipped === []
+    ? ''
+    : sprintf(
+        " (%d skipped — repository checks, run this before deploying: %s)",
+        count($skipped),
+        implode('; ', $skipped)
+    );
+
 if ($failures === []) {
-    printf("All %d checks passed.\n\n", $passes);
+    printf("All %d checks passed.%s\n\n", $passes, $note);
     exit(0);
 }
 
-printf("%d passed, %d FAILED:\n\n", $passes, count($failures));
+printf("%d passed, %d FAILED.%s\n\n", $passes, count($failures), $note);
 
 foreach ($failures as $failure) {
     echo '  - ' . $failure . "\n";
