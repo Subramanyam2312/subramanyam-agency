@@ -569,6 +569,29 @@
     transform: translateY(-3px);
   }
 
+  /*
+   * Uploaded site logo in the header.
+   *
+   * Constrained by HEIGHT with width:auto, because the logo is whatever shape the
+   * owner uploads — a square mark, a long wordmark, anything. Capping the width
+   * instead would let a tall logo overflow the 4.5rem header bar, and fixing both
+   * would squash it. max-width is a backstop so an extreme banner cannot push the
+   * navigation off a narrow screen.
+   */
+  .site-logo {
+    height: 2rem;
+    width: auto;
+    max-width: 12rem;
+    object-fit: contain;
+  }
+
+  @media (min-width: 640px) {
+    .site-logo {
+      height: 2.25rem;
+      max-width: 16rem;
+    }
+  }
+
   /* Nav underline that grows from the left on hover and stays put when active. */
   .nav-item {
     @apply relative transition-colors hover:text-body;

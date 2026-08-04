@@ -50,6 +50,8 @@ $noindex   = (bool) ($meta['noindex'] ?? false);
 
     <meta name="theme-color" content="#0a0b0d">
 
+    <?= $this->include('partials/site-icons') ?>
+
     <?php if ($verification = Setting::get('search_console_token')): ?>
         <meta name="google-site-verification" content="<?= e($verification) ?>">
     <?php endif; ?>

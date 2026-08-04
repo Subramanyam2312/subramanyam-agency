@@ -1,8 +1,14 @@
 <?php
 
+use App\Core\Branding;
+use App\Models\Media;
 use App\Models\Setting;
 
 $siteName = Setting::get('site_name', config('app.name'));
+
+/* Null until someone uploads one in Settings -> Appearance; the wordmark stands in. */
+$logo       = Branding::logo();
+$logoSrcset = $logo === null ? '' : Media::srcset($logo);
 
 $navigation = [
     ['label' => 'Home',     'href' => '/', 'exact' => true],
@@ -29,8 +35,21 @@ $isActive = static function (array $item) use ($currentPath): bool {
         class="fixed inset-x-0 top-0 z-50 transition-[background-color,border-color,backdrop-filter] duration-300
                border-b border-transparent">
     <div class="container-site flex h-[4.5rem] items-center justify-between gap-6">
-        <a href="/" class="group relative z-10 flex items-baseline gap-2">
-            <span class="display text-xl tracking-tight"><?= e($siteName) ?></span>
+        <a href="/" class="group relative z-10 flex items-center gap-2">
+            <?php if ($logo !== null): ?>
+                <!-- Height-constrained with width:auto, so any aspect ratio fits the
+                     header bar. The site name stays as alt text: a logo that fails to
+                     load must not leave the header with no way back to the home page. -->
+                <img src="<?= e(Branding::url($logo)) ?>"
+                     <?= $logoSrcset !== '' ? 'srcset="' . e($logoSrcset) . '" sizes="(max-width: 640px) 140px, 200px"' : '' ?>
+                     alt="<?= e($siteName) ?>"
+                     class="site-logo"
+                     <?= ($logo['width'] ?? null) ? 'width="' . (int) $logo['width'] . '"' : '' ?>
+                     <?= ($logo['height'] ?? null) ? 'height="' . (int) $logo['height'] . '"' : '' ?>
+                     decoding="async">
+            <?php else: ?>
+                <span class="display text-xl tracking-tight"><?= e($siteName) ?></span>
+            <?php endif; ?>
         </a>
 
         <nav class="hidden items-center gap-8 md:flex" aria-label="Main">

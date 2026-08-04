@@ -199,8 +199,12 @@
     const preview = pickerTarget.querySelector('[data-media-preview]');
     const clear = pickerTarget.querySelector('[data-media-clear]');
 
+    // Match the fit the server rendered with, so picking a logo does not crop it
+    // until the next page load. Defaults to cover for every existing caller.
+    const fit = pickerTarget.dataset.mediaFit || 'object-cover';
+
     input.value = id;
-    preview.innerHTML = '<img src="' + path + '" alt="' + escapeHtml(alt) + '" class="h-full w-full object-cover">';
+    preview.innerHTML = '<img src="' + path + '" alt="' + escapeHtml(alt) + '" class="h-full w-full ' + fit + '">';
 
     if (clear) {
       clear.hidden = false;

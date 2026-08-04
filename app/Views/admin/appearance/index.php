@@ -94,8 +94,54 @@
         </div>
     </section>
 
+    <!-- Logo and browser icon ----------------------------------------------- -->
+    <section class="card mt-6 p-5 sm:p-6">
+        <h2 class="text-sm font-semibold">Logo and browser icon</h2>
+        <p class="mt-1 max-w-2xl text-xs text-muted">
+            Both are optional. With no logo the header shows the site name as text, and
+            with no icon the browser uses its own default — neither leaves a gap.
+        </p>
+
+        <div class="mt-5 grid gap-8 border-t border-line/70 pt-5 sm:grid-cols-2">
+            <div>
+                <?= $this->include('partials/field', [
+                    'name'  => 'site_logo_media_id',
+                    'label' => 'Site logo',
+                    'type'     => 'media',
+                    'mediaFit' => 'contain',
+                    'value' => $logoId,
+                    'media' => $logoMedia,
+                    'hint'  => 'Shown in the header, scaled to 36px tall. A transparent PNG '
+                             . 'or SVG works best — the header sits on a dark background.',
+                ]) ?>
+            </div>
+
+            <div>
+                <?= $this->include('partials/field', [
+                    'name'  => 'site_icon_media_id',
+                    'label' => 'Browser icon (favicon)',
+                    'type'     => 'media',
+                    'mediaFit' => 'contain',
+                    'value' => $iconId,
+                    'media' => $iconMedia,
+                    'hint'  => 'The small icon on the browser tab, and the home-screen icon on '
+                             . 'phones. Use a square image, 512×512 or larger. It is served at '
+                             . 'full size, so keep the file small.',
+                ]) ?>
+
+                <?php if ($iconMedia !== null && ($iconMedia['width'] ?? null) && ($iconMedia['height'] ?? null)
+                          && (int) $iconMedia['width'] !== (int) $iconMedia['height']): ?>
+                    <p class="alert-warning mt-3">
+                        This icon is <?= (int) $iconMedia['width'] ?>×<?= (int) $iconMedia['height'] ?>, not square.
+                        Browsers will squash it to fit the tab. A square image will look right.
+                    </p>
+                <?php endif; ?>
+            </div>
+        </div>
+    </section>
+
     <div class="mt-6">
-        <button type="submit" class="btn-primary">Save typography</button>
+        <button type="submit" class="btn-primary">Save appearance</button>
     </div>
 </form>
 <?php $this->stop(); ?>

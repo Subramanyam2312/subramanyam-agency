@@ -17,6 +17,9 @@
  *   rows      int      textarea rows
  *   fields    array    for repeater: [key => label]
  *   media     array    for media: the currently attached media row
+ *   mediaFit  string   for media: 'cover' (default) or 'contain'. Use 'contain' for
+ *                      logos and icons, where cropping to fill the square preview
+ *                      would hide half of a wide wordmark.
  *   attrs     string   extra raw attributes
  *
  * SECURITY: `attrs` is printed into the tag WITHOUT escaping, because its whole
@@ -35,6 +38,7 @@ $required = $required ?? false;
 $rows     = $rows     ?? 4;
 $fields   = $fields   ?? [];
 $media    = $media    ?? null;
+$mediaFit = ($mediaFit ?? 'cover') === 'contain' ? 'object-contain' : 'object-cover';
 $attrs    = $attrs    ?? '';
 
 // Old input wins after a failed validation round-trip so nothing typed is lost.
@@ -91,12 +95,14 @@ $aria        = ($error ? ' aria-invalid="true"' : '')
         <input type="hidden" id="<?= e($id) ?>" name="<?= e($name) ?>" value="<?= e($value) ?>">
 
     <?php elseif ($type === 'media'): ?>
-        <div class="flex items-start gap-4" data-media-field>
+        <!-- data-media-fit is read by admin-forms.js, so the preview it injects after
+             picking matches the one rendered here rather than reverting to cover. -->
+        <div class="flex items-start gap-4" data-media-field data-media-fit="<?= e($mediaFit) ?>">
             <div class="h-24 w-24 shrink-0 overflow-hidden rounded-lg border border-line bg-raised"
                  data-media-preview>
                 <?php if ($media !== null): ?>
                     <img src="/<?= e(ltrim((string) $media['path'], '/')) ?>"
-                         alt="<?= e($media['alt_text'] ?? '') ?>" class="h-full w-full object-cover">
+                         alt="<?= e($media['alt_text'] ?? '') ?>" class="h-full w-full <?= $mediaFit ?>">
                 <?php endif; ?>
             </div>
             <div class="flex-1">

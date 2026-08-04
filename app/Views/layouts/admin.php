@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <title><?= e($this->yieldSection('title', 'Admin')) ?> · <?= e(config('app.name')) ?></title>
+
+    <?= $this->include('partials/site-icons') ?>
+
     <link rel="stylesheet" href="<?= e(asset('/assets/css/app.css')) ?>">
 </head>
 <body class="h-full">
