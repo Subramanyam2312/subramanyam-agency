@@ -39,7 +39,15 @@ final class HomeController extends Controller
             'logos'        => ClientLogo::withMedia(true),
             'posts'        => $this->latestPosts(),
             'meta'         => [
-                'title'       => PageBlock::value('home', 'hero_headline', (string) config('app.name')),
+                /*
+                 * Deliberately no longer the hero headline. The H1 is positioning copy
+                 * ("Marketing that earns its line on the P&L") — good on the page, but it
+                 * names no service and no place, so the title tag, which is the strongest
+                 * on-page relevance signal there is, gave Google nothing to match a query
+                 * against. Its own block keeps the two independent and keeps the title
+                 * editable from Content -> Page copy.
+                 */
+                'title'       => PageBlock::value('home', 'meta_title', 'Digital Marketing & SEO Consultant in Chennai'),
                 'description' => PageBlock::value('home', 'hero_subheadline'),
             ],
         ]);

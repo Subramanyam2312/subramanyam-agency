@@ -29,7 +29,7 @@ final class PageController extends Controller
             'services' => Service::all(['is_active' => 1], 'sort_order ASC, title ASC'),
             'faqs'     => Faq::grouped(),
             'meta'     => [
-                'title'       => 'Services',
+                'title'       => 'Digital Marketing Services in Chennai',
                 'description' => 'SEO, paid media, content, web build and analytics — measured against pipeline rather than impressions.',
             ],
         ]);
@@ -78,7 +78,7 @@ final class PageController extends Controller
                 'is_featured DESC, sort_order ASC'
             ),
             'meta'  => [
-                'title'       => 'Work',
+                'title'       => 'Case Studies — SEO & Paid Media Results',
                 'description' => 'Selected engagements where the numbers moved enough to be worth writing up.',
             ],
         ]);
@@ -130,7 +130,10 @@ final class PageController extends Controller
             // Timeline section removed from the About page; no longer queried here.
             'logos'    => ClientLogo::withMedia(true),
             'meta'     => [
-                'title'       => 'About Subramanyam M N — Digital Marketing Strategist in Chennai',
+                // Keeps the name (the brand query) and Chennai, but drops "About" and
+                // "Strategist": with the " · SUBRAMANYAM" suffix the old one ran to 76
+                // characters and Google truncated it mid-phrase in the results.
+                'title'       => 'Subramanyam M N — Digital Marketing, Chennai',
                 'description' => "I'm Subramanyam M N, a digital marketing strategist and content creator in Chennai. I build brand strategy, ad creative, SEO and AI-assisted video for brands across South India.",
                 'og_image'    => $ogImage,
             ],

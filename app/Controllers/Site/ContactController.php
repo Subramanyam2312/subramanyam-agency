@@ -39,7 +39,9 @@ final class ContactController extends Controller
             'services' => Service::options(),
             'budgets'  => self::BUDGETS,
             'meta'     => [
-                'title'       => 'Contact Subramanyam M N — Digital Marketing Strategist in Chennai',
+                // Shortened for the same reason as About: the old title plus the site-name
+                // suffix was 77 characters and got cut off in the results.
+                'title'       => 'Contact — Digital Marketing, Chennai',
                 'description' => "Get in touch with Subramanyam M N — digital marketing strategist and content creator in Chennai. A straight conversation about strategy, ad creative, video and SEO. No obligation.",
                 'og_image'    => $ogImage,
             ],

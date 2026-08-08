@@ -37,7 +37,9 @@ final class BlogController extends Controller
 
         $result = $this->query($search, $category === null ? null : (int) $category['id'], $page);
 
-        $title = $category !== null ? $category['name'] : 'Blog';
+        // A category keeps its own name — it is already a topic phrase. Only the
+        // unfiltered index needs help, where "Blog" on its own said nothing.
+        $title = $category !== null ? $category['name'] : 'Digital Marketing Blog — SEO & Paid Media';
 
         return $this->view('site/blog/index', [
             'posts'      => $result['data'],
