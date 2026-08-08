@@ -95,11 +95,11 @@ $founderImg  = is_file($founderFile) ? $founderPath . '?v=' . filemtime($founder
                         </svg>
 
                         <div class="founder-nodes" aria-hidden="true">
-                            <span class="founder-node" style="top:16%;left:22%;--d:6s"></span>
-                            <span class="founder-node" style="top:30%;left:78%;--d:8s"></span>
-                            <span class="founder-node" style="top:64%;left:12%;--d:7s"></span>
-                            <span class="founder-node" style="top:74%;left:86%;--d:9s"></span>
-                            <span class="founder-node" style="top:50%;left:50%;--d:6.5s"></span>
+                            <span class="founder-node"></span>
+                            <span class="founder-node"></span>
+                            <span class="founder-node"></span>
+                            <span class="founder-node"></span>
+                            <span class="founder-node"></span>
                         </div>
 
                         <div class="founder-photo-wrap">

@@ -49,7 +49,24 @@ final class ImageProcessor
             return [];
         }
 
-        $image        = self::applyExifOrientation($image, $sourcePath);
+        $image = self::applyExifOrientation($image, $sourcePath);
+
+        /*
+         * GD cannot encode a palette image to WebP. imagewebp() warns
+         * "Palette image not supported by webp", RETURNS TRUE, and writes a
+         * zero-byte file — so trusting the return value records an empty
+         * variant in srcset and the image breaks on the public site.
+         *
+         * Palette PNGs are ordinary: any "8-bit PNG" export produces one.
+         * resize() already draws onto a truecolor canvas, which is why the
+         * width variants survived and only the full-size one was empty.
+         */
+        if (!imageistruecolor($image)) {
+            imagepalettetotruecolor($image);
+            imagealphablending($image, false);
+            imagesavealpha($image, true);
+        }
+
         $sourceWidth  = imagesx($image);
         $sourceHeight = imagesy($image);
         $variants     = [];
@@ -64,7 +81,7 @@ final class ImageProcessor
 
             $filename = $baseName . '-' . $width . '.webp';
 
-            if (imagewebp($resized, $targetDirectory . '/' . $filename, $quality)) {
+            if (self::writeWebp($resized, $targetDirectory . '/' . $filename, $quality)) {
                 $variants[$width] = $filename;
             }
 
@@ -75,7 +92,7 @@ final class ImageProcessor
         // the single biggest byte saving on the page.
         $fullName = $baseName . '-full.webp';
 
-        if (imagewebp($image, $targetDirectory . '/' . $fullName, $quality)) {
+        if (self::writeWebp($image, $targetDirectory . '/' . $fullName, $quality)) {
             $variants[$sourceWidth] = $fullName;
         }
 
@@ -126,6 +143,38 @@ final class ImageProcessor
         };
 
         return $image === false ? null : $image;
+    }
+
+    /**
+     * Writes a WebP and confirms something actually landed on disk.
+     *
+     * imagewebp() cannot be trusted on its own: for inputs it does not support
+     * it returns TRUE while leaving a zero-byte file behind. A variant recorded
+     * from that lands in srcset, the browser picks it, and the image silently
+     * fails to render — which is exactly how this surfaced. Verifying the size
+     * costs one stat() and removes the empty file so nothing can serve it.
+     */
+    private static function writeWebp(GdImage $image, string $path, int $quality): bool
+    {
+        if (!imageistruecolor($image)) {
+            imagepalettetotruecolor($image);
+            imagealphablending($image, false);
+            imagesavealpha($image, true);
+        }
+
+        if (!@imagewebp($image, $path, $quality)) {
+            @unlink($path);
+
+            return false;
+        }
+
+        if (!is_file($path) || filesize($path) === 0) {
+            @unlink($path);
+
+            return false;
+        }
+
+        return true;
     }
 
     private static function resize(GdImage $source, int $width, int $height): GdImage

@@ -786,6 +786,22 @@
     animation: founder-float var(--d, 7s) ease-in-out infinite;
   }
 
+  /*
+   * Scatter positions live here rather than in style="" attributes on the spans.
+   *
+   * style-src carries a nonce, and a nonce makes the browser ignore
+   * 'unsafe-inline' — which blocks inline style ATTRIBUTES outright, since a
+   * nonce can only be attached to a <style> element. With the attributes
+   * blocked every node fell back to the same coordinates and the five dots
+   * stacked in one spot. These values were always static, so CSS is where they
+   * belong; keeping them here means the strict policy costs nothing.
+   */
+  .founder-node:nth-child(1) { top: 16%; left: 22%; --d: 6s; }
+  .founder-node:nth-child(2) { top: 30%; left: 78%; --d: 8s; }
+  .founder-node:nth-child(3) { top: 64%; left: 12%; --d: 7s; }
+  .founder-node:nth-child(4) { top: 74%; left: 86%; --d: 9s; }
+  .founder-node:nth-child(5) { top: 50%; left: 50%; --d: 6.5s; }
+
   /* The portrait, feathered into the dark. */
   .founder-photo-wrap {
     position: absolute; inset: 0;
