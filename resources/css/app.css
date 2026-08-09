@@ -636,6 +636,31 @@
     }
   }
 
+  /*
+   * About section motif.
+   *
+   * Fills the empty half of the heading column on Philosophy, Creative and
+   * Credentials. Sits lower than the service glyphs (0.28 against 0.45) because
+   * it is roughly four times the area — the same alpha that reads as a mark at
+   * 4rem reads as a competing graphic at 15rem.
+   *
+   * Hidden below lg on purpose: the columns stack there, so the drawing would
+   * only push the body copy further down a page that is already long.
+   */
+  .about-motif {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .about-motif {
+      display: block;
+      width: 15rem;
+      height: 15rem;
+      margin-top: 3.5rem;
+      color: rgb(var(--c-accent) / 0.28);
+    }
+  }
+
   /* Nav underline that grows from the left on hover and stays put when active. */
   .nav-item {
     @apply relative transition-colors hover:text-body;

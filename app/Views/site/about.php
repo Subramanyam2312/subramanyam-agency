@@ -100,6 +100,8 @@ foreach ($repeat($max, 'faq', ['q', 'a'], 'q') as $row) {
                 <h2 id="philosophy-heading" class="display-lg reveal mt-3" data-split<?= editable('about','philosophy_heading') ?>>
                     <?= e($block('philosophy_heading')) ?>
                 </h2>
+
+                <?= $this->include('partials/about-motif', ['motif' => 'philosophy']) ?>
             </div>
             <div class="lg:col-span-6 lg:col-start-7">
                 <div class="prose-editorial reveal"<?= editable('about','philosophy_body','html') ?>><?= $block('philosophy_body') ?></div>
@@ -148,6 +150,8 @@ foreach ($repeat($max, 'faq', ['q', 'a'], 'q') as $row) {
             <div class="lg:col-span-5">
                 <p class="section-index"<?= editable('about','creative_label') ?>><?= e($block('creative_label')) ?></p>
                 <h2 id="creative-heading" class="display-lg reveal mt-3" data-split<?= editable('about','creative_heading') ?>><?= e($block('creative_heading')) ?></h2>
+
+                <?= $this->include('partials/about-motif', ['motif' => 'creative']) ?>
             </div>
             <div class="lg:col-span-6 lg:col-start-7">
                 <div class="prose-editorial reveal"<?= editable('about','creative_body','html') ?>><?= $block('creative_body') ?></div>
@@ -201,6 +205,8 @@ foreach ($repeat($max, 'faq', ['q', 'a'], 'q') as $row) {
                 <p class="section-index"<?= editable('about','cred_label') ?>><?= e($block('cred_label')) ?></p>
                 <h2 id="credentials-heading" class="display-lg reveal mt-3" data-split<?= editable('about','cred_heading') ?>><?= e($block('cred_heading')) ?></h2>
                 <p class="prose-body mt-6 text-sm text-muted"><?= e($block('cred_intro')) ?></p>
+
+                <?= $this->include('partials/about-motif', ['motif' => 'credentials']) ?>
             </div>
             <ul class="space-y-4 lg:col-span-6 lg:col-start-7">
                 <?php foreach ($credentials as $cred): ?>
