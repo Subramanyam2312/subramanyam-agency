@@ -170,11 +170,17 @@ $founderImg  = is_file($founderFile) ? $founderPath . '?v=' . filemtime($founder
             <p class="prose-body reveal max-w-sm text-sm"><?= e($block('services_intro')) ?></p>
         </div>
 
-        <ul class="mt-14 grid gap-px overflow-hidden rounded-card border border-line/70 bg-line/70 sm:grid-cols-2 lg:grid-cols-3">
+        <!-- service-grid--compact: three-up here against two-up on /services, so the
+             marks step down a size rather than crowding the cards. -->
+        <ul class="service-grid--compact mt-14 grid gap-px overflow-hidden rounded-card border border-line/70 bg-line/70 sm:grid-cols-2 lg:grid-cols-3">
             <?php foreach ($services as $service): ?>
                 <li class="reveal bg-ink transition-colors hover:bg-surface/60" data-tilt>
                     <a href="/services/<?= e($service['slug']) ?>" class="group flex h-full flex-col p-7">
-                        <h3 class="display-md"><?= e($service['title']) ?></h3>
+                        <?= $this->include('partials/service-glyph', [
+                            'icon' => (string) ($service['icon'] ?? ''),
+                        ]) ?>
+
+                        <h3 class="display-md mt-5"><?= e($service['title']) ?></h3>
                         <p class="prose-body mt-3 text-sm"><?= e($service['short_description']) ?></p>
                         <span class="mt-6 inline-flex items-center gap-2 text-sm text-muted transition-colors group-hover:text-body">
                             Explore

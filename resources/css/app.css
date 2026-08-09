@@ -694,6 +694,16 @@
     }
   }
 
+  /*
+   * Home service grid: three-up rather than the two-up on /services, so the mark
+   * steps down and leads the card instead of sitting opposite a number — there is
+   * no numbering in this grid to sit opposite.
+   */
+  .service-grid--compact .service-glyph {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
   /* Nav underline that grows from the left on hover and stays put when active. */
   .nav-item {
     @apply relative transition-colors hover:text-body;
