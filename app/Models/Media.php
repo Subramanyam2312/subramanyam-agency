@@ -53,8 +53,20 @@ final class Media extends Model
 
         $parts = [];
 
+        /*
+         * Each candidate goes through asset() for the same ?v=<mtime> the src gets.
+         *
+         * Without it these URLs are immutable to the browser, and .htaccess caches
+         * image/webp for a year — so anyone who loaded a page while a variant was
+         * still the 0-byte file GD used to write (fixed in 29e5278) keeps being served
+         * that empty response from their own cache for up to twelve months. The file
+         * on disk is correct, a fresh fetch decodes fine, and only the <img> is broken:
+         * naturalWidth reads 0x0 while createImageBitmap() on the same URL succeeds.
+         * Regenerating variants does not help either, because the URL never changes.
+         * Tying the candidate to mtime means a rewritten variant is simply a new URL.
+         */
         foreach ($variants as $width => $path) {
-            $parts[] = '/' . ltrim((string) $path, '/') . ' ' . (int) $width . 'w';
+            $parts[] = asset((string) $path) . ' ' . (int) $width . 'w';
         }
 
         return implode(', ', $parts);
