@@ -592,6 +592,50 @@
     }
   }
 
+  /*
+   * Service card glyph.
+   *
+   * Sits at the muted end of the palette so it reads as a mark rather than an
+   * icon competing with the headline, then warms toward gold on card hover —
+   * the same restraint the case-study covers use, where the line-art is always
+   * quieter than the type it accompanies.
+   */
+  .service-glyph {
+    width: 3.25rem;
+    height: 3.25rem;
+    flex-shrink: 0;
+    /*
+     * The accent at low alpha, which is how the case-study covers get their
+     * bronze: champagne knocked back against near-black rather than a separate
+     * colour. --c-line was the first attempt and disappeared entirely — it is
+     * the hairline-rule token and is meant to be almost invisible.
+     */
+    color: rgb(var(--c-accent) / 0.45);
+    transition: color 300ms ease, transform 300ms ease;
+  }
+
+  .group:hover .service-glyph {
+    color: rgb(var(--c-accent) / 0.78);
+    transform: translateY(-2px);
+  }
+
+  @media (min-width: 640px) {
+    .service-glyph {
+      width: 4rem;
+      height: 4rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .service-glyph {
+      transition: none;
+    }
+
+    .group:hover .service-glyph {
+      transform: none;
+    }
+  }
+
   /* Nav underline that grows from the left on hover and stays put when active. */
   .nav-item {
     @apply relative transition-colors hover:text-body;

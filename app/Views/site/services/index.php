@@ -14,9 +14,15 @@
             <?php foreach ($services as $index => $service): ?>
                 <li class="reveal lift bg-ink">
                     <a href="/services/<?= e($service['slug']) ?>" class="group flex h-full flex-col p-8">
-                        <p class="font-mono text-xs text-muted/70">
-                            <?= e(str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT)) ?>
-                        </p>
+                        <div class="flex items-start justify-between gap-6">
+                            <p class="font-mono text-xs text-muted/70">
+                                <?= e(str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT)) ?>
+                            </p>
+
+                            <?= $this->include('partials/service-glyph', [
+                                'icon' => (string) ($service['icon'] ?? ''),
+                            ]) ?>
+                        </div>
 
                         <h2 class="display-md mt-4"><?= e($service['title']) ?></h2>
                         <p class="prose-body mt-3 text-sm"><?= e($service['short_description']) ?></p>
