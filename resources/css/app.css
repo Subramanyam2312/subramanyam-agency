@@ -661,6 +661,39 @@
     }
   }
 
+  /*
+   * Service mark in an inner-page hero.
+   *
+   * Sits in the empty half beside the 20ch heading. Alpha drops again — 0.14
+   * against the glyph's 0.45 — because this is roughly thirty times the card
+   * area and sits behind a gilt h1 that has to stay the loudest thing on screen.
+   *
+   * The .service-glyph sizing rules are overridden rather than reused: this is
+   * the same drawing doing a different job, at a different scale.
+   */
+  .hero-glyph {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .hero-glyph {
+      position: absolute;
+      right: 6%;
+      top: 50%;
+      transform: translateY(-42%);
+      z-index: -10;
+      pointer-events: none;
+      display: block;
+    }
+
+    .hero-glyph .service-glyph {
+      width: 22rem;
+      height: 22rem;
+      color: rgb(var(--c-accent) / 0.14);
+      transition: none;
+    }
+  }
+
   /* Nav underline that grows from the left on hover and stays put when active. */
   .nav-item {
     @apply relative transition-colors hover:text-body;

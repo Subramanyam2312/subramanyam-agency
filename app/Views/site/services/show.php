@@ -55,6 +55,7 @@ $schema = [
     'eyebrow' => 'Service',
     'heading' => $service['hero_headline'] ?: $service['title'],
     'lede'    => $service['hero_subheadline'] ?: $service['short_description'],
+    'glyph'   => (string) ($service['icon'] ?? ''),
 ]) ?>
 
 <?php if ($service['problem_statement']): ?>

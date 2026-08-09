@@ -15,9 +15,21 @@ $lede    = $lede ?? '';
    strings inline-editable inside a CMS preview. */
 $editPage = $editPage ?? '';
 $edit     = static fn (string $key): string => $editPage === '' ? '' : editable($editPage, $key);
+
+/* Optional service mark. The heading is capped at 20ch, so on wide screens the
+   right half of every inner hero is empty; a service page fills it with the same
+   glyph its card carries, which makes the click feel continuous instead of
+   landing somewhere unrelated. Pages that pass nothing are unchanged. */
+$glyph = $glyph ?? '';
 ?>
 <section class="relative isolate overflow-hidden pb-16 pt-36 sm:pb-20 sm:pt-44">
     <div class="hero-motion absolute inset-0 -z-20 opacity-60" aria-hidden="true"></div>
+
+    <?php if ($glyph !== ''): ?>
+        <div class="hero-glyph" aria-hidden="true">
+            <?= $this->include('partials/service-glyph', ['icon' => $glyph]) ?>
+        </div>
+    <?php endif; ?>
     <div class="hero-grain pointer-events-none absolute inset-0 -z-10" aria-hidden="true"></div>
     <div class="pointer-events-none absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-t from-ink to-transparent"
          aria-hidden="true"></div>
