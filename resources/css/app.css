@@ -704,6 +704,34 @@
     height: 2.75rem;
   }
 
+  /*
+   * Client name in the trust bar, standing in for a logo image.
+   *
+   * Set in the display serif at the same 50% weight the logo marquee used, so
+   * the band reads identically whether it is carrying type or marks. Sized in
+   * rem rather than matched to the images' h-7, because a wordmark needs more
+   * height than a logo to stay legible.
+   */
+  .trust-name {
+    @apply display;
+    font-size: 1.375rem;
+    line-height: 1.75rem;
+    white-space: nowrap;
+    color: rgb(var(--c-body) / 0.5);
+    transition: color 300ms ease;
+  }
+
+  .trust-name:hover {
+    color: rgb(var(--c-body) / 0.9);
+  }
+
+  @media (min-width: 640px) {
+    .trust-name {
+      font-size: 1.625rem;
+      line-height: 2rem;
+    }
+  }
+
   /* Nav underline that grows from the left on hover and stays put when active. */
   .nav-item {
     @apply relative transition-colors hover:text-body;

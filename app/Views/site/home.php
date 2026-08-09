@@ -16,6 +16,31 @@ $heroPoster = $block('hero_poster');
 $founderPath = '/uploads/founder/founder.jpg';
 $founderFile = PUBLIC_PATH . $founderPath;
 $founderImg  = is_file($founderFile) ? $founderPath . '?v=' . filemtime($founderFile) : '';
+
+/*
+ * Trust bar names, used when no client logo images have been uploaded.
+ *
+ * The band renders marks at 28px and 50% opacity, which only flatters a single
+ * colour logo with no tagline — the files actually to hand are a neon pixel-art
+ * badge and a gradient wordmark carrying strapline text, and both turn to mush
+ * at that size. Setting the names in the site's own serif is legible at any
+ * size, cannot clash with the palette, and needs no assets.
+ *
+ * Names come from the About page's client blocks rather than a second copy, so
+ * the two pages cannot drift apart. Uploading real logos in the CMS puts the
+ * image marquee back automatically — this is the fallback, not a replacement.
+ */
+$clientNames = [];
+
+if ($logos === []) {
+    for ($i = 1; $i <= (int) config('repeatables.max', 12); $i++) {
+        $name = PageBlock::value('about', "client_{$i}_name");
+
+        if ($name !== '') {
+            $clientNames[] = $name;
+        }
+    }
+}
 ?>
 
 <?php $this->start('content'); ?>
@@ -133,7 +158,7 @@ $founderImg  = is_file($founderFile) ? $founderPath . '?v=' . filemtime($founder
 </section>
 
 <!-- ====================================================== TRUST BAR -->
-<?php if ($logos !== []): ?>
+<?php if ($logos !== [] || $clientNames !== []): ?>
     <section class="rule py-10" aria-label="Selected clients">
         <p class="container-site eyebrow mb-8"><?= e($block('trust_bar_label')) ?></p>
 
@@ -143,14 +168,22 @@ $founderImg  = is_file($founderFile) ? $founderPath . '?v=' . filemtime($founder
                  aria-hidden on the duplicate so it is announced only once. -->
             <?php for ($copy = 0; $copy < 2; $copy++): ?>
                 <ul class="marquee-track" <?= $copy === 1 ? 'aria-hidden="true"' : '' ?>>
-                    <?php foreach ($logos as $logo): ?>
-                        <li class="shrink-0">
-                            <img src="/<?= e(ltrim((string) $logo['media_path'], '/')) ?>"
-                                 alt="<?= e($logo['media_alt'] ?: $logo['name']) ?>"
-                                 class="h-7 w-auto opacity-50 transition-opacity hover:opacity-90"
-                                 loading="lazy" decoding="async">
-                        </li>
-                    <?php endforeach; ?>
+                    <?php if ($logos !== []): ?>
+                        <?php foreach ($logos as $logo): ?>
+                            <li class="shrink-0">
+                                <img src="<?= e(asset((string) $logo['media_path'])) ?>"
+                                     alt="<?= e($logo['media_alt'] ?: $logo['name']) ?>"
+                                     class="h-7 w-auto opacity-50 transition-opacity hover:opacity-90"
+                                     loading="lazy" decoding="async">
+                            </li>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <?php foreach ($clientNames as $name): ?>
+                            <li class="shrink-0">
+                                <span class="trust-name"><?= e($name) ?></span>
+                            </li>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
                 </ul>
             <?php endfor; ?>
         </div>
