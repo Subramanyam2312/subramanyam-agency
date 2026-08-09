@@ -23,7 +23,23 @@ use App\Middleware\SecurityHeaders;
 use App\Middleware\VerifyCsrf;
 
 define('BASE_PATH', dirname(__DIR__));
-define('PUBLIC_PATH', BASE_PATH . '/public');
+
+/*
+ * The web root is `public/` in the repository and `public_html/` on Hostinger,
+ * which renames it at deploy time.
+ *
+ * Hardcoding `public/` did not just break the two .htaccess checks — it quietly
+ * hollowed out three others. "app/ is outside the web root" and its siblings are
+ * written as !is_dir(PUBLIC_PATH . '/app'), so against a directory that does not
+ * exist they returned true and reported ok without testing anything. A vacuous
+ * pass is worse than a failure: the failure got looked at, these did not.
+ */
+define('PUBLIC_PATH', is_dir(BASE_PATH . '/public') ? BASE_PATH . '/public' : BASE_PATH . '/public_html');
+
+if (!is_dir(PUBLIC_PATH)) {
+    fwrite(STDERR, "Cannot locate the web root: neither public/ nor public_html/ exists under " . BASE_PATH . ".\n");
+    exit(1);
+}
 
 require BASE_PATH . '/app/bootstrap.php';
 
