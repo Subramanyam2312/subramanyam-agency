@@ -860,7 +860,20 @@
     z-index: -1;
   }
   @media (max-width: 1023px) {
-    .founder-scene { margin: 2.5rem auto 0; max-width: 22rem; }
+    /*
+     * width:100% is load-bearing, not tidiness.
+     *
+     * `margin: … auto` on a grid item switches it from stretch to shrink-to-fit,
+     * and .founder-stage holds nothing but absolutely-positioned layers — grid,
+     * chart, nodes, portrait, chips, scan — so its intrinsic width is 0. The
+     * scene collapsed to 0x0 on every phone, aspect-ratio dutifully made the
+     * height 0 too, and the portrait vanished. The three chips kept painting,
+     * because absolute boxes do not care that their container has no size, so
+     * the hero ended in a heap of overlapping labels and no photo.
+     *
+     * Stating the width restores stretch while max-width still caps it.
+     */
+    .founder-scene { width: 100%; margin: 2.5rem auto 0; max-width: 22rem; }
   }
 
   .founder-stage {
