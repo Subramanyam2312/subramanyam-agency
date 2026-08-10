@@ -1,4 +1,9 @@
-<?php $this->extend('layouts/site'); ?>
+<?php
+
+use App\Models\Media;
+
+$this->extend('layouts/site');
+?>
 
 <?php $this->start('head'); ?>
 <?php
@@ -80,9 +85,28 @@ $breadcrumbs = [
     </header>
 
     <?php if ($featured !== null): ?>
+        <?php
+        /*
+         * src through asset() for the ?v=<mtime>, and the WebP variants offered
+         * alongside it.
+         *
+         * The raw path was interpolated here with neither. That is the same defect
+         * fixed for srcset in ecfd0f3 and the trust bar in 37f9845, and it bites
+         * hardest on this element: .htaccess caches image/webp for a year, so a
+         * cover uploaded once and later corrected would keep serving the broken
+         * copy from readers' caches, unreachable from the server. No post has a
+         * featured image yet, which is exactly why this is worth fixing now —
+         * before the first upload, rather than after one goes wrong.
+         *
+         * Without srcset the full-size original was served to every reader; the
+         * generated variants existed and simply went unused.
+         */
+        $featuredSrcset = Media::srcset($featured);
+        ?>
         <div class="container-site max-w-4xl">
             <div class="img-reveal rounded-card border border-line/70">
-                <img src="/<?= e(ltrim((string) $featured['path'], '/')) ?>"
+                <img src="<?= e(asset((string) $featured['path'])) ?>"
+                     <?= $featuredSrcset !== '' ? 'srcset="' . e($featuredSrcset) . '" sizes="(max-width: 896px) 100vw, 896px"' : '' ?>
                      alt="<?= e($featured['alt_text'] ?? '') ?>"
                      <?= $featured['width'] ? 'width="' . (int) $featured['width'] . '"' : '' ?>
                      <?= $featured['height'] ? 'height="' . (int) $featured['height'] . '"' : '' ?>
