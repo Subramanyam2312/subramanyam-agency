@@ -20,24 +20,25 @@ use App\Models\Setting;
 
 final class ContactController extends Controller
 {
-    private const BUDGETS = [
-        'Under ₹50k/month'  => 'Under ₹50k/month',
-        '₹50k–1L/month'     => '₹50k–1L/month',
-        '₹1L–2.5L/month'    => '₹1L–2.5L/month',
-        'Over ₹2.5L/month'  => 'Over ₹2.5L/month',
-        'Project, not retainer' => 'Project, not retainer',
-        'Not sure yet'      => 'Not sure yet',
-    ];
-
     public function show(Request $request): Response
     {
         $ogImage = is_file(PUBLIC_PATH . '/uploads/founder/founder.jpg')
             ? rtrim((string) config('app.url'), '/') . '/uploads/founder/founder.jpg'
             : null;
 
+        /*
+         * The form is deliberately three fields (55a22b5, "a short form"), so the
+         * service and budget lists it once fed are gone: the template never read
+         * either, and Service::options() was running a query on every page view to
+         * build a list nobody saw.
+         *
+         * The validation rules for phone, company, service_id and budget_range stay.
+         * They are all nullable, they cost nothing on a request that omits them, and
+         * they are what stops a hand-crafted POST writing junk into those columns.
+         * Service is still imported because notify() resolves the service name for
+         * the notification email, and the admin submission view still shows Budget.
+         */
         return $this->view('site/contact', [
-            'services' => Service::options(),
-            'budgets'  => self::BUDGETS,
             'meta'     => [
                 // Shortened for the same reason as About: the old title plus the site-name
                 // suffix was 77 characters and got cut off in the results.
