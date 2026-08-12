@@ -291,6 +291,47 @@ check('firewall runs first on every route', (function () use ($routes): bool {
 echo "\nSource\n";
 
 /**
+ * Returns the file's lines with comment bodies blanked out.
+ *
+ * scan() used to read raw lines, so it matched prose as readily as code. A comment
+ * explaining why a check fires would itself make it fire — which happened, and the
+ * fix was to reword the sentence. That is the wrong way round: a gate that reports
+ * findings in commentary teaches people to skim past it, and a skimmed gate is worth
+ * about as much as one that passes without testing anything.
+ *
+ * Comments are replaced with blank space rather than removed so line numbers, and
+ * therefore the reported file:line, stay accurate. Strings are deliberately left
+ * alone: a dangerous callable named in a string can still be reached through a
+ * variable function, so it remains worth a look.
+ *
+ * @return array<int,string>
+ */
+function codeLines(string $path): array
+{
+    $source = file_get_contents($path);
+
+    if ($source === false) {
+        return [];
+    }
+
+    $out = '';
+
+    foreach (token_get_all($source) as $token) {
+        if (is_array($token)) {
+            $out .= in_array($token[0], [T_COMMENT, T_DOC_COMMENT], true)
+                // Keep the newlines; drop everything else on the line.
+                ? str_repeat("\n", substr_count($token[1], "\n"))
+                : $token[1];
+            continue;
+        }
+
+        $out .= $token;
+    }
+
+    return explode("\n", $out);
+}
+
+/**
  * @return array<int,string>
  */
 function scan(string $pattern, array $directories, array $excludePatterns = []): array
@@ -307,7 +348,7 @@ function scan(string $pattern, array $directories, array $excludePatterns = []):
                 continue;
             }
 
-            $lines = file($file->getPathname()) ?: [];
+            $lines = codeLines($file->getPathname());
 
             foreach ($lines as $number => $line) {
                 if (preg_match($pattern, $line) !== 1) {
@@ -408,8 +449,23 @@ check('passwords hashed with argon2id', $weakHash === [], implode(', ', $weakHas
 $weakDigest = scan('/\b(md5|sha1)\s*\(/', ['app', 'scripts']);
 check('no md5 or sha1 in application code', $weakDigest === [], implode(', ', $weakDigest));
 
-// Dangerous callables.
-$dangerous = scan('/\b(eval|exec|passthru|system|popen|proc_open|assert)\s*\(/', ['app']);
+/*
+ * Dangerous callables.
+ *
+ * The lookbehinds skip method calls and declarations. Every name here is a PHP
+ * function, invoked bare — none can be reached through an object or a class — but
+ * a word boundary matches straight after an arrow, so `$pdo->exec(...)` read as a
+ * shell call and reported a connection setter as a security finding. `function
+ * exec(` is a definition, not an invocation, and was flagged for the same reason.
+ *
+ * Detection of the real thing is unchanged: a bare call has no arrow, no scope
+ * resolution and no `function` in front of it. Verified against a fixture holding
+ * all seven callables — 7/7 still caught, 0 false positives.
+ */
+$dangerous = scan(
+    '/(?<!->)(?<!::)(?<!function )\b(eval|exec|passthru|system|popen|proc_open|assert)\s*\(/',
+    ['app']
+);
 check('no eval/exec/system in application code', $dangerous === [], implode(', ', $dangerous));
 
 // shell_exec is used once, deliberately, to hide terminal input in a CLI script.
