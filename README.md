@@ -1,41 +1,64 @@
-# Agency website and CMS
+# subramanyam-agency
 
-Public marketing site plus a custom content portal. PHP 8.2+ and MySQL, no framework,
-no page builder, no third-party CMS.
+A marketing website and its content portal, written in plain PHP — no framework, no page builder, no WordPress. Built for a small agency site that needed a real CMS behind it and had to run on shared hosting.
 
-Deployment to Hostinger shared hosting is covered separately in `DEPLOY.md` (Phase 7).
-API documentation lands in `API.md` (Phase 4).
+![The content portal's dashboard](docs/images/dashboard.png)
 
----
+<!-- Replace docs/images/dashboard.png — see docs/images/README.md for what to capture -->
 
-## Requirements
+## Why this exists
 
-| | |
-|---|---|
-| PHP | 8.2 or newer, with `pdo_mysql`, `mbstring`, `gd`, `fileinfo`, `openssl` |
-| Database | MySQL 8 or MariaDB 10.4+ |
-| Composer | Local development only — **not** required on the server |
-| Node | Not required anywhere. Tailwind builds via a standalone binary. |
+Client sites kept landing in the same trap: WordPress plus a page builder plus eight plugins, which is slow, fragile, and needs updating forever. The alternative usually offered is a headless CMS with a monthly bill and a hosting story the client can't afford.
 
----
+This is the third option — a small PHP application with the CMS built in, deployable by file copy to a ₹300/month shared host, with no Composer step on the server and no npm build in production. It runs the site it was written for.
 
-## Local setup
+## Features
+
+**Content**
+- Page content stored as editable blocks, with drafts separate from published values
+- Inline editing on the live site for signed-in staff, scoped to a preview mode
+- Blog with categories, tags, scheduled publishing, and an RSS feed
+- Services, case studies, FAQs, testimonials and client logos as managed resources
+- Media library with automatic WebP variant generation and remote image import
+
+**SEO**
+- Per-post SEO analysis with scoring (`app/Core/SeoAnalyzer.php`)
+- Generated `sitemap.xml` and `robots.txt`, rebuilt on publish
+- Per-page title and meta description control
+
+**Security**
+- Application-level firewall with rule management and an event log
+- Rate limiting with IP addresses hashed before storage
+- CSRF tokens, nonces, and a security-headers middleware including CSP
+- HTML sanitisation through HTMLPurifier on every rich-text field
+- Spam guard on public forms
+- `scripts/security-audit.php` — a pre-deploy check that exits non-zero on failure
+
+**Operations**
+- Token-authenticated REST API (see [API.md](API.md))
+- First-party traffic tracking — visitors, paths, referrers — with no third-party script
+- Activity log of admin actions
+- Appearance settings: typography picker, branding, site logo and favicon
+- Page cache with asset fingerprinting
+
+## Quick start
+
+Requires PHP 8.2+ with `pdo_mysql`, `mbstring`, `gd`, `fileinfo`, `openssl`, and MySQL 8 or MariaDB 10.4+. Composer is needed for local development only — **not** on the server.
 
 ```bash
+git clone https://github.com/Subramanyam2312/subramanyam-agency.git
+cd subramanyam-agency
 composer install
 cp .env.example .env
 ```
 
-Generate a key and paste it into `APP_KEY`:
+Generate an application key and paste it into `APP_KEY`:
 
 ```bash
 php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"
 ```
 
-`APP_KEY` is the HMAC key used to hash IP addresses before storage. Changing it later
-only invalidates existing rate-limit buckets, which is harmless.
-
-Fill in the `DB_*` values, then create the schema and load placeholder content:
+Fill in the `DB_*` values, then build the schema and load demo content:
 
 ```bash
 php database/migrate.php --seed
@@ -53,163 +76,80 @@ Run it:
 php -S localhost:8130 -t public public/index.php
 ```
 
-The admin portal is at `/admin`. For local development set `MAIL_DRIVER=log`, which
-writes rendered emails to `storage/logs/mail.log` instead of sending them.
+The site is at `http://localhost:8130`, the portal at `/admin`.
 
----
+For local development set `MAIL_DRIVER=log`, which writes rendered emails to `storage/logs/mail.log` instead of sending them.
 
-## Stylesheet
+> `scripts/serve.sh` automates all of the above including a local MySQL, but it downloads a ~250 MB MySQL build on first run. The manual steps above avoid that.
 
-Tailwind compiles to a single static file through the standalone CLI, so no Node
-runtime and no `node_modules` are involved. Fetch the binary once:
+## Configuration
 
-```bash
-curl -sSL -o resources/bin/tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-macos-arm64
-```
+| Variable | Purpose | Note |
+|---|---|---|
+| `APP_ENV` | `local` or `production` | |
+| `APP_DEBUG` | Error display | Must be `false` in production |
+| `APP_URL` | Canonical base URL | Must agree with `.htaccess` on `www` |
+| `APP_KEY` | 64 hex chars | HMAC key for hashing IPs before storage |
+| `APP_TIMEZONE` | PHP and MySQL timezone | |
+| `DB_HOST` | Database host | `localhost` on most shared hosts |
+| `DB_PORT` | Database port | |
+| `DB_DATABASE` | Database name | |
+| `DB_USERNAME` | Database user | |
+| `DB_PASSWORD` | Database password | |
+| `SESSION_NAME` | Session cookie name | |
+| `MAIL_DRIVER` | `smtp` or `log` | `log` writes to a file instead of sending |
+| `MAIL_HOST` | SMTP host | |
+| `MAIL_PORT` | SMTP port | 587/`tls` or 465/`ssl` |
+| `MAIL_USERNAME` | SMTP user | |
+| `MAIL_PASSWORD` | SMTP password | |
+| `MAIL_ENCRYPTION` | `tls` or `ssl` | |
+| `MAIL_FROM_ADDRESS` | Sender | Must be on your own domain or DMARC drops it |
+| `MAIL_TO_ADDRESS` | Where form notifications go | |
+| `SECURITY_HSTS` | HSTS toggle | `false` until HTTPS is proven |
+| `SECURITY_HSTS_MAX_AGE` | HSTS lifetime | Start at `300` |
 
-Swap `macos-arm64` for `macos-x64` or `linux-x64` as needed, then:
+Changing `APP_KEY` later only invalidates existing rate-limit buckets, which is harmless.
 
-```bash
-chmod +x resources/bin/tailwindcss && ./resources/build-css.sh
-```
-
-Use `./resources/build-css.sh --watch` while working on templates.
-
-The compiled `public/assets/css/app.css` **is** committed, because deploying to shared
-hosting is a file copy with no build step at the far end.
-
----
-
-## Layout
+## Architecture
 
 ```
 app/
-├── Config/       app.php, database.php, mail.php, security.php, session.php, routes.php
-├── Core/         Router, Request, Response, View, Database, Model, Auth, Csrf,
-│                 Validator, RateLimiter, Mailer, Slugger, ActivityLogger, Env, Config
-├── Controllers/  Admin/ (portal), Site/ (Phase 5), Api/ (Phase 4)
-├── Middleware/   SecurityHeaders, VerifyCsrf, RequireAuth, RequireAdmin
-├── Models/
-├── Support/      helpers.php
-└── Views/        layouts/, partials/, admin/, emails/, errors/
-database/
-├── migrations/   applied in filename order, tracked in a `migrations` table
-├── seed.sql
-└── migrate.php
-public/           ← web root: index.php, .htaccess, assets/, uploads/
-resources/        Tailwind source, config and build script
-scripts/          CLI entry points
-storage/          logs, cache, sessions — writable, never web-accessible
+├── Config/        configuration loaders
+├── Controllers/   Site (public), Admin (portal), Api
+├── Core/          router, database, auth, firewall, SEO, media, mail
+├── Middleware/    CSRF, auth, firewall, security headers, page optimise
+├── Models/        data access
+├── Support/       helpers
+└── Views/         templates
+database/migrations/   18 numbered SQL files, applied in filename order
+public/                the only web-accessible directory
+scripts/               admin creation, mail test, scheduled publish, security audit
 ```
 
-`app/`, `storage/`, `vendor/` and `database/` sit **outside** the web root. On Hostinger
-the contents of `public/` become `public_html/`, and `public/index.php` probes one and
-then two levels up for `app/`, so the same codebase runs locally and deployed with no edit.
+Routing is a small custom router; there is no framework. Only two runtime dependencies: `ezyang/htmlpurifier` and `phpmailer/phpmailer`.
+
+`public/index.php` probes one directory up for `app/`, then two, so the same code runs locally and in a shared-hosting layout where `app/` sits above the web root, with no edit.
+
+`vendor/` is committed deliberately — Composer is not guaranteed to exist on shared hosting, so dependencies deploy by file copy.
+
+Deployment is covered in [DEPLOY.md](DEPLOY.md), with a host-agnostic version at [hostinger-php-deploy](https://github.com/Subramanyam2312/hostinger-php-deploy).
+
+## Limitations
+
+- **Single-site.** No multi-tenancy, no site switcher.
+- **No automated tests.** Verified by hand and by `scripts/security-audit.php`. This is the biggest gap.
+- **No build pipeline.** Tailwind compiles through a standalone binary; there is no bundler, and no CI.
+- **MySQL/MariaDB only.** Raw SQL migrations, no query-builder abstraction, no Postgres or SQLite support.
+- **Migrations are forward-only.** There are no down migrations and no rollback.
+- **Seed content is generic demo copy**, not the live site's content.
+- **`scripts/security-audit.php` needs a working `.env` and database** — it will not run on a fresh clone until you have completed the quick start.
+- **English-only admin.** No i18n layer.
+- **Deploy is a file copy.** No zero-downtime deploy and no rollback mechanism; take a backup first.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
 
 ---
 
-## Migrations
-
-```bash
-php database/migrate.php            # apply pending
-php database/migrate.php --status   # list applied and pending
-php database/migrate.php --seed     # apply, then load seed.sql
-php database/migrate.php --fresh    # drop everything and re-run (APP_ENV=local only)
-```
-
-Migrations are plain SQL applied in filename order and recorded by name, so re-running
-is safe. MySQL commits DDL implicitly — a failed migration cannot roll back, so the
-runner stops at the first error and prints the exact file and statement.
-
-`seed.sql` assumes empty tables. It inserts posts with no author, because on a fresh
-install no user exists yet; the first admin created afterwards adopts them.
-
-Media and client logos are **not** seeded — a media row has to point at a file that
-really exists, and seeding one would produce broken images.
-
----
-
-## Conventions
-
-- `snake_case` in the database, `camelCase` in JavaScript, `PascalCase` for classes
-- Rows are plain associative arrays, not entity objects
-- Every value reaching SQL is a bound parameter; identifiers are validated against
-  `^[A-Za-z_][A-Za-z0-9_]*$` and back-quoted
-- Every dynamic value printed in a template goes through `e()`
-- Rich text is sanitized on **save**, not on render
-
----
-
-## Security notes
-
-- Passwords hashed with argon2id, rehashed transparently when parameters change
-- CSRF token required on every mutating request; API is exempt because it uses
-  bearer tokens rather than cookies
-- Login is throttled per IP+email **and** locked per account, so rotating IPs does not help
-- Nonce-based CSP with no `unsafe-inline` — which is why nothing loads from a CDN
-- Sessions are stored in `storage/sessions`, not the world-readable system default
-- IP addresses are stored only as HMACs
-- HSTS stays off until HTTPS is confirmed working on the live domain
-
----
-
-## What is here
-
-**Public site** — home, services index and detail, work index and case studies,
-about, FAQ, blog with category filtering and search, post pages, contact, privacy,
-terms, RSS. Every string on every page comes from the CMS.
-
-**Content portal** at `/admin` — posts (rich text, scheduling, tags, per-post SEO),
-categories, services with per-service FAQs, case studies, testimonials, FAQs,
-timeline, client logos, page copy, media library, enquiry inbox, newsletter
-subscribers, settings, users and API tokens.
-
-**REST API** at `/api/v1` — token-authenticated, so an external agent can publish
-here. See `API.md`.
-
----
-
-## Commands
-
-```bash
-php database/migrate.php --seed     # schema + placeholder content
-php scripts/create-admin.php        # first account (no public sign-up exists)
-php scripts/security-audit.php      # 26 checks; exits non-zero on failure
-php scripts/publish-scheduled.php   # cron: publish due posts, sweep rate limits
-./resources/build-css.sh            # compile Tailwind
-```
-
-Run the security audit before every deploy. It boots the real router and asserts
-that no `/admin` route is reachable without a session, that settings and users
-additionally require the admin role, that every `/api` route needs a bearer token,
-and that every mutating non-API route verifies CSRF — checks that catch a route
-written into the wrong group, which is how admin pages leak.
-
----
-
-## Build status
-
-| Phase | Scope | State |
-|---|---|---|
-| 1 | Stack, structure, schema | Done — `PHASE-1-PLAN.md` |
-| 2 | Scaffold, migrations, seed, auth, admin shell | Done |
-| 3 | CMS content modules, media library, settings | Done |
-| 4 | REST API + `API.md` | Done |
-| 5 | Public site | Done |
-| 6 | SEO, schema, performance, accessibility | Done |
-| 7 | Security review, `DEPLOY.md` | Done |
-
-### Known gaps
-
-- **Lighthouse has not been run.** There was no Chrome binary in the build
-  environment. Page weight, contrast, heading order and blocking-resource counts
-  were measured directly instead. Run it against the live domain after deploy.
-- **No hero video file.** The mechanism is built and wired to a CMS field; set
-  Page copy → Hero → video URL and it attaches after load, desktop only, never
-  under reduced motion or on a metered connection. Until then the hero runs on a
-  CSS motion layer.
-- **Privacy and terms are a starting point, not legal advice.** They describe what
-  this application actually does. Have them reviewed.
-- **Critical CSS is not inlined.** Deliberate — the reasoning is in the layout head.
-- **Client logos and media are not seeded**, because a media row must point at a
-  file that exists. Upload real assets before the logo marquee appears.
+Built by [Subramanyam M N](https://subramanyammn.in).
