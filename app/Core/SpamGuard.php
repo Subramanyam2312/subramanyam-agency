@@ -29,6 +29,28 @@ final class SpamGuard
         'porn', 'xxx', 'escort', 'replica watches', 'weight loss pills',
     ];
 
+    /*
+     * User-agent fragments that never belong to a person filling in a form.
+     *
+     * Added after a scanner vendor's pitch arrived through the contact form and
+     * scored clean: one link (the cap is four), no listed keyword, ordinary letter
+     * ratio. Every local heuristic reads the message, and the message was
+     * well-written — so nothing looked at the giveaway, which was the user agent
+     * announcing HeadlessChrome.
+     *
+     * Matched as substrings, lowercased. These are deliberately literal: a real
+     * browser never says "headlesschrome" or "python-requests", so the false
+     * positive rate is close to zero. Generic words like "bot" are left out —
+     * crawlers do not POST forms, and the word appears in enough odd real agents
+     * to be worth avoiding.
+     */
+    private const AUTOMATION_AGENTS = [
+        'headlesschrome', 'phantomjs', 'puppeteer', 'playwright', 'selenium',
+        'python-requests', 'python-urllib', 'curl/', 'wget/', 'go-http-client',
+        'okhttp', 'scrapy', 'axios/', 'node-fetch', 'libwww-perl', 'httpclient',
+        'apache-httpclient', 'postmanruntime', 'insomnia/',
+    ];
+
     public static function enabled(): bool
     {
         try {
@@ -50,6 +72,23 @@ final class SpamGuard
 
         $message = (string) ($fields['message'] ?? '');
         $email   = (string) ($fields['email'] ?? '');
+
+        // --- Automation ---------------------------------------------------
+        // Cheapest signal available, and independent of how well the message reads.
+        // Flagged rather than blocked: the enquiry is still stored and visible in
+        // the admin, it just does not trigger a notification email. A false
+        // positive costs a delayed reply, never a lost lead.
+        $agent = mb_strtolower(trim($request->userAgent()));
+
+        if ($agent === '') {
+            return ['verdict' => 'spam', 'reason' => 'no user agent'];
+        }
+
+        foreach (self::AUTOMATION_AGENTS as $marker) {
+            if (str_contains($agent, $marker)) {
+                return ['verdict' => 'spam', 'reason' => 'automated client: ' . $marker];
+            }
+        }
 
         // --- Local heuristics ---------------------------------------------
         $maxLinks = (int) Setting::get('spam_max_links', 4);
