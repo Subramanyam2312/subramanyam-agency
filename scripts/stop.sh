@@ -2,7 +2,7 @@
 #
 # Stops the local SUBRAMANYAM web server and database.
 #
-#   bash ~/Desktop/subramanyam-agency/scripts/stop.sh
+#   bash <project>/scripts/stop.sh
 
 DB="$HOME/.agency-db/mysql"
 SOCK="/tmp/ags.sock"

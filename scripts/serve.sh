@@ -10,13 +10,17 @@
 # and rebuilds it automatically (a one-time ~250 MB download), so it keeps working
 # across restarts.
 #
-#   bash ~/Desktop/subramanyam-agency/scripts/serve.sh
+#   bash <project>/scripts/serve.sh
 #
 # Or double-click "Open SUBRAMANYAM.command" on the Desktop.
 
 set -e
 
-PROJECT="$HOME/Desktop/subramanyam-agency"
+# Resolved from this script's own location (<project>/scripts/serve.sh) rather
+# than a fixed path. A hardcoded project directory breaks silently the first time
+# the folder is moved or the repository is cloned somewhere else, and the failure
+# looks like a broken database rather than a wrong path.
+PROJECT="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")/.." && pwd)"
 DB="$HOME/.agency-db/mysql"
 DATA="$DB/data"
 SOCK="/tmp/ags.sock"
