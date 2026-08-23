@@ -40,10 +40,24 @@ final class ContactController extends Controller
          */
         return $this->view('site/contact', [
             'meta'     => [
-                // Shortened for the same reason as About: the old title plus the site-name
-                // suffix was 77 characters and got cut off in the results.
-                'title'       => 'Contact — Digital Marketing, Chennai',
-                'description' => "Get in touch with Subramanyam M N — digital marketing strategist and content creator in Chennai. A straight conversation about strategy, ad creative, video and SEO. No obligation.",
+                /*
+                 * Contact intent only — the service keywords are deliberately absent.
+                 *
+                 * This was the most-shown page on the site and had never once been
+                 * clicked: 19 impressions in the 28 days to 21 Aug 2026, against five
+                 * for the homepage. The cause was on-page, not authority. The title
+                 * carried "Digital Marketing, Chennai" and the description repeated
+                 * the same "strategy, ad creative, video and SEO" list as the home and
+                 * about pages, so Google held four near-identical candidates for one
+                 * query and spread impressions across them semi-arbitrarily. A contact
+                 * page cannot answer a service query, so those terms now live only on
+                 * /services and the homepage, which can.
+                 *
+                 * Length still matters: the title plus the " · SUBRAMANYAM" suffix has
+                 * to stay under roughly 60 characters or Google truncates it mid-phrase.
+                 */
+                'title'       => 'Contact Subramanyam M N',
+                'description' => "Get in touch with Subramanyam M N in Chennai. Tell me what you're working on and I'll reply within one business day — by email, phone or WhatsApp.",
                 'og_image'    => $ogImage,
             ],
         ]);

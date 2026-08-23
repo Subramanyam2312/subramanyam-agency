@@ -130,11 +130,25 @@ final class PageController extends Controller
             // Timeline section removed from the About page; no longer queried here.
             'logos'    => ClientLogo::withMedia(true),
             'meta'     => [
-                // Keeps the name (the brand query) and Chennai, but drops "About" and
-                // "Strategist": with the " · SUBRAMANYAM" suffix the old one ran to 76
-                // characters and Google truncated it mid-phrase in the results.
-                'title'       => 'Subramanyam M N — Digital Marketing, Chennai',
-                'description' => "I'm Subramanyam M N, a digital marketing strategist and content creator in Chennai. I build brand strategy, ad creative, SEO and AI-assisted video for brands across South India.",
+                /*
+                 * This page owns the person, not the service — the homepage owns that.
+                 *
+                 * Both used to say the same thing. The description here repeated the
+                 * homepage's "brand strategy, ad creative, SEO and AI-assisted video"
+                 * almost verbatim, and the title carried "Digital Marketing, Chennai"
+                 * like /services and /contact did, so Google had four interchangeable
+                 * candidates for one query and split impressions between them: about
+                 * drew 15 in the 28 days to 21 Aug 2026 and the homepage only five,
+                 * neither converting. "who is subramanyam" was one of just two queries
+                 * Search Console would disclose in that window, which is the intent
+                 * this page should actually answer, so the title leads with the name.
+                 *
+                 * What is left is what the homepage cannot claim: one person doing both
+                 * halves of the job, the Tamil and South Indian market work, and the
+                 * named clients. All of it is on the page itself.
+                 */
+                'title'       => 'About Subramanyam M N',
+                'description' => "Who I am and how I work: one person doing the strategy and the making, in Chennai and across Tamil-speaking markets. Clients include Acme Drones and Cobblestone Footwear.",
                 'og_image'    => $ogImage,
             ],
         ]);
