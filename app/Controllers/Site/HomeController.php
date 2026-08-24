@@ -48,7 +48,24 @@ final class HomeController extends Controller
                  * editable from Content -> Page copy.
                  */
                 'title'       => PageBlock::value('home', 'meta_title', 'Digital Marketing & SEO Consultant in Chennai'),
-                'description' => PageBlock::value('home', 'hero_subheadline'),
+
+                /*
+                 * The description gets its own block for the same reason the title did.
+                 *
+                 * It used to read the hero subheadline directly, which made one string
+                 * do two jobs with different limits. On the page the subheadline can run
+                 * long; as a meta description anything past ~160 characters is cut off
+                 * mid-sentence in the results. It was 196, so it always was. Shortening
+                 * the hero to fit would have damaged the page to serve the snippet.
+                 *
+                 * The fallback keeps the old behaviour when the block is unset, so this
+                 * is safe on any install that has not been given a description yet.
+                 */
+                'description' => PageBlock::value(
+                    'home',
+                    'meta_description',
+                    PageBlock::value('home', 'hero_subheadline')
+                ),
             ],
         ]);
     }
