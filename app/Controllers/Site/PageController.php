@@ -147,11 +147,19 @@ final class PageController extends Controller
                  * halves of the job, the Tamil and South Indian market work, and the
                  * named clients. All of it is on the page itself.
                  *
-                 * Names here are placeholders: this file is public, and the real
-                 * client list belongs in the CMS, not in source.
+                 * Both fields read from page blocks rather than string literals here.
+                 * The description in particular names clients on the live site, and
+                 * this repository is public — customer names belong in the database,
+                 * which is not published. The defaults below are the fallback for an
+                 * install that has not set them, so they stay generic.
                  */
-                'title'       => 'About Subramanyam M N',
-                'description' => "Who I am and how I work: one person doing the strategy and the making, in Chennai and across Tamil-speaking markets. Clients include Acme Drones and Cobblestone Footwear.",
+                'title'       => PageBlock::value('about', 'meta_title', 'About Subramanyam M N'),
+                'description' => PageBlock::value(
+                    'about',
+                    'meta_description',
+                    'Who I am and how I work: one person doing the strategy and the making, '
+                    . 'in Chennai and across Tamil-speaking markets.'
+                ),
                 'og_image'    => $ogImage,
             ],
         ]);

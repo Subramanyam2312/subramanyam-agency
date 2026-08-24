@@ -11,6 +11,7 @@ use App\Core\Mailer;
 use App\Core\RateLimiter;
 use App\Core\Request;
 use App\Core\Response;
+use App\Models\PageBlock;
 use App\Core\Sanitizer;
 use App\Core\Session;
 use App\Core\SpamGuard;
@@ -56,8 +57,13 @@ final class ContactController extends Controller
                  * Length still matters: the title plus the " · SUBRAMANYAM" suffix has
                  * to stay under roughly 60 characters or Google truncates it mid-phrase.
                  */
-                'title'       => 'Contact Subramanyam M N',
-                'description' => "Get in touch with Subramanyam M N in Chennai. Tell me what you're working on and I'll reply within one business day — by email, phone or WhatsApp.",
+                'title'       => PageBlock::value('contact', 'meta_title', 'Contact Subramanyam M N'),
+                'description' => PageBlock::value(
+                    'contact',
+                    'meta_description',
+                    "Get in touch with Subramanyam M N in Chennai. Tell me what you're working "
+                    . "on and I'll reply within one business day — by email, phone or WhatsApp."
+                ),
                 'og_image'    => $ogImage,
             ],
         ]);
