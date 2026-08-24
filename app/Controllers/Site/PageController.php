@@ -146,6 +146,9 @@ final class PageController extends Controller
                  * What is left is what the homepage cannot claim: one person doing both
                  * halves of the job, the Tamil and South Indian market work, and the
                  * named clients. All of it is on the page itself.
+                 *
+                 * Names here are placeholders: this file is public, and the real
+                 * client list belongs in the CMS, not in source.
                  */
                 'title'       => 'About Subramanyam M N',
                 'description' => "Who I am and how I work: one person doing the strategy and the making, in Chennai and across Tamil-speaking markets. Clients include Acme Drones and Cobblestone Footwear.",
