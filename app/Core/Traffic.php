@@ -25,6 +25,48 @@ use Throwable;
  */
 final class Traffic
 {
+    /**
+     * Clients whose request is not a person reading the page.
+     *
+     * Everything here is matched as a lowercase substring of the user agent.
+     * SpamGuard keeps a similar list for the contact form, but a narrower one:
+     * it only cares about automation pretending to be a person filling in a
+     * form, and has no reason to exclude Googlebot. This list has to exclude
+     * both, so the two are kept separate rather than shared.
+     *
+     * Self-declaring crawlers whose name simply ends in "bot" are caught by
+     * BOT_PATTERN instead, so they are not repeated here.
+     */
+    private const NON_HUMAN_AGENTS = [
+        // Crawlers and readers that do not end in "bot"
+        'crawler', 'crawling', 'spider', 'slurp', 'yandex', 'baidu',
+        'duckduckgo', 'ia_archiver', 'mediapartners-google',
+        'google-inspectiontool', 'facebookexternalhit', 'embedly',
+        'quora link preview', 'skypeuripreview', 'whatsapp', 'feedfetcher',
+        // Auditing and monitoring
+        'lighthouse', 'pagespeed', 'pingdom', 'statuscake', 'site24x7',
+        // Scripted HTTP clients
+        'headlesschrome', 'phantomjs', 'puppeteer', 'playwright', 'selenium',
+        'python-requests', 'python-urllib', 'curl/', 'wget/', 'go-http-client',
+        'okhttp', 'scrapy', 'axios/', 'node-fetch', 'libwww-perl', 'java/',
+        'apache-httpclient', 'postmanruntime', 'insomnia/',
+    ];
+
+    /**
+     * Device names containing "bot" that belong to real visitors. Checked
+     * before BOT_PATTERN, which would otherwise drop them: CUBOT is an Android
+     * phone brand sold in India, this site's main market.
+     */
+    private const AGENT_EXCEPTIONS = ['cubot'];
+
+    /**
+     * A self-declared crawler: "Googlebot/2.1", "AhrefsBot;", "bingbot)".
+     *
+     * "bot" must not be followed by another letter, so "Googlebot/2.1" matches
+     * while a word that merely contains the letters does not.
+     */
+    private const BOT_PATTERN = '~bot(?![a-z])~';
+
     public static function enabled(): bool
     {
         try {
@@ -40,7 +82,7 @@ final class Traffic
      */
     public static function record(Request $request): void
     {
-        if (!self::enabled()) {
+        if (!self::enabled() || !self::countable($request)) {
             return;
         }
 
@@ -164,6 +206,48 @@ final class Traffic
             Database::query('DELETE FROM `traffic_visitors` WHERE `day` < DATE_SUB(CURDATE(), INTERVAL 90 DAY)');
         } catch (Throwable) {
         }
+    }
+
+    /**
+     * Is this request worth counting as a human page view?
+     *
+     * Before this existed the counter recorded every request that reached PHP,
+     * so crawlers, uptime pingers and scripted checks all showed up as visitors.
+     * On 10 Sep 2026 the counter reported 44 views from 8 visitors in a day that
+     * was almost entirely one automated sweep of the sitemap.
+     *
+     * Substring matching is crude and will never be complete — a crawler that
+     * declares itself as an ordinary browser is still counted, and nothing here
+     * can catch that. It removes the non-human traffic that identifies itself
+     * honestly, which on this site is the bulk of it.
+     */
+    private static function countable(Request $request): bool
+    {
+        // A HEAD request never rendered a page for anybody.
+        if ($request->method() === 'HEAD') {
+            return false;
+        }
+
+        $agent = mb_strtolower(trim($request->userAgent()));
+
+        // Every real browser sends one; an empty agent is a script.
+        if ($agent === '') {
+            return false;
+        }
+
+        foreach (self::NON_HUMAN_AGENTS as $marker) {
+            if (str_contains($agent, $marker)) {
+                return false;
+            }
+        }
+
+        foreach (self::AGENT_EXCEPTIONS as $exception) {
+            if (str_contains($agent, $exception)) {
+                return true;
+            }
+        }
+
+        return preg_match(self::BOT_PATTERN, $agent) !== 1;
     }
 
     private static function refererHost(string $referer): ?string
